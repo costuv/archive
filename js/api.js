@@ -19,6 +19,7 @@ async function getFiles() {
   }
 
   try {
+    console.log('Fetching files from Supabase...');
     const { data, error } = await supabase
       .from('files')
       .select(`
@@ -33,6 +34,13 @@ async function getFiles() {
     if (error) {
       console.error('Error fetching files:', error);
       return getFilesFromLocalStorage();
+    }
+
+    console.log('Files fetched successfully:', data?.length || 0, 'files');
+    
+    if (!data || data.length === 0) {
+      console.log('No files found in database');
+      return [];
     }
 
     // Transform data to match expected format
@@ -69,6 +77,11 @@ async function createFile(fileData) {
   }
 
   try {
+    // Check auth status
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Current session:', session ? 'Authenticated as ' + session.user.email : 'Not authenticated');
+    console.log('Creating file in database:', fileData);
+    
     const { data, error } = await supabase
       .from('files')
       .insert({
@@ -86,9 +99,11 @@ async function createFile(fileData) {
       .single();
 
     if (error) {
+      console.error('Database INSERT error:', error);
       return { success: false, error: error.message };
     }
 
+    console.log('File created successfully:', data);
     return { success: true, data };
   } catch (err) {
     return { success: false, error: err.message };

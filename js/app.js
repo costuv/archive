@@ -77,11 +77,24 @@ async function initApp() {
  */
 async function loadData() {
   try {
+    // Wait for Supabase to be ready if configured
+    if (isSupabaseConfigured()) {
+      let attempts = 0;
+      while (!getSupabase() && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      console.log('Supabase ready after', attempts * 100, 'ms');
+    }
+    
     // Load files and folders in parallel
+    console.log('Loading files and folders...');
     const [files, folders] = await Promise.all([
       getFiles(),
       getFolders()
     ]);
+    
+    console.log('Loaded', files.length, 'files and', folders.length, 'folders');
     
     appState.files = files;
     appState.folders = recalculateFolderCounts(files, folders);
@@ -634,13 +647,13 @@ if (document.readyState === 'loading') {
     if (isSupabaseConfigured()) {
       window.addEventListener('supabaseReady', initApp, { once: true });
       
-      // Reduced timeout for faster mobile experience
+      // Faster timeout - Supabase CDN usually loads quickly
       setTimeout(() => {
         if (appState.isLoading) {
           console.warn('Supabase load timeout, initializing anyway');
           initApp();
         }
-      }, 3000);
+      }, 2000);
     } else {
       initApp();
     }
@@ -654,7 +667,7 @@ if (document.readyState === 'loading') {
       window.addEventListener('supabaseReady', initApp, { once: true });
       setTimeout(() => {
         if (appState.isLoading) initApp();
-      }, 3000);
+      }, 2000);
     }
   } else {
     initApp();
