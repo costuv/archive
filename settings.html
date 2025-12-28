@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - ArchIve</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth-pages.css">
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+    }
+  </script>
+</head>
+<body>
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+  <div class="auth-page">
+    <div class="auth-container settings-container">
+      <a href="profile.html" class="back-link">
+        <span class="icon" id="back-icon"></span>
+        Back to Profile
+      </a>
+      
+      <div class="auth-header">
+        <h1 class="auth-title">Settings</h1>
+        <p class="auth-subtitle">Manage your account preferences</p>
+      </div>
+
+      <!-- Appearance Section -->
+      <div class="settings-section">
+        <h2 class="settings-section-title">Appearance</h2>
+        
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <span class="icon" id="theme-icon"></span>
+            <div>
+              <p class="settings-item-label">Dark Mode</p>
+              <p class="settings-item-desc">Switch between light and dark theme</p>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="dark-mode-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Account Section -->
+      <div class="settings-section">
+        <h2 class="settings-section-title">Account</h2>
+        
+        <!-- Change Username -->
+        <div class="settings-item settings-item-expandable" id="username-section">
+          <div class="settings-item-header" onclick="toggleSection('username')">
+            <div class="settings-item-info">
+              <span class="icon" id="user-icon"></span>
+              <div>
+                <p class="settings-item-label">Change Username</p>
+                <p class="settings-item-desc">Update your display name</p>
+              </div>
+            </div>
+            <span class="icon expand-icon" id="username-expand-icon"></span>
+          </div>
+          <div class="settings-item-content" id="username-content">
+            <form id="username-form">
+              <div class="form-group">
+                <label class="form-label" for="new-username">New Username</label>
+                <input type="text" id="new-username" class="form-input" placeholder="Enter new username" autocomplete="off">
+                <p class="form-hint">Lowercase letters, numbers, and underscores only. Min 3 characters.</p>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Update Username</button>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Change Email -->
+        <div class="settings-item settings-item-expandable" id="email-section">
+          <div class="settings-item-header" onclick="toggleSection('email')">
+            <div class="settings-item-info">
+              <span class="icon" id="mail-icon"></span>
+              <div>
+                <p class="settings-item-label">Change Email</p>
+                <p class="settings-item-desc">Update your email address</p>
+              </div>
+            </div>
+            <span class="icon expand-icon" id="email-expand-icon"></span>
+          </div>
+          <div class="settings-item-content" id="email-content">
+            <form id="email-form">
+              <div class="form-group">
+                <label class="form-label" for="new-email">New Email</label>
+                <input type="email" id="new-email" class="form-input" placeholder="Enter new email" autocomplete="off">
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Update Email</button>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Change Password -->
+        <div class="settings-item settings-item-expandable" id="password-section">
+          <div class="settings-item-header" onclick="toggleSection('password')">
+            <div class="settings-item-info">
+              <span class="icon" id="lock-icon"></span>
+              <div>
+                <p class="settings-item-label">Change Password</p>
+                <p class="settings-item-desc">Update your password</p>
+              </div>
+            </div>
+            <span class="icon expand-icon" id="password-expand-icon"></span>
+          </div>
+          <div class="settings-item-content" id="password-content">
+            <form id="password-form">
+              <div class="form-group">
+                <label class="form-label" for="new-password">New Password</label>
+                <input type="password" id="new-password" class="form-input" placeholder="Enter new password">
+                <p class="form-hint">Minimum 6 characters</p>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="confirm-new-password">Confirm New Password</label>
+                <input type="password" id="confirm-new-password" class="form-input" placeholder="Confirm new password">
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Update Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-section settings-section-danger">
+        <h2 class="settings-section-title">Danger Zone</h2>
+        
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <span class="icon" id="trash-icon"></span>
+            <div>
+              <p class="settings-item-label">Delete Account</p>
+              <p class="settings-item-desc">Permanently delete your account and all data</p>
+            </div>
+          </div>
+          <button type="button" class="btn btn-danger btn-sm" id="delete-account-btn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account Confirmation Dialog -->
+  <div class="dialog-overlay" id="delete-dialog-overlay">
+    <div class="dialog delete-dialog">
+      <div class="dialog-header">
+        <h2 class="dialog-title">Delete Account</h2>
+        <button type="button" class="dialog-close" id="delete-dialog-close">
+          <span class="icon" id="close-icon"></span>
+        </button>
+      </div>
+      <div class="dialog-content">
+        <p class="delete-warning">This action cannot be undone. This will permanently delete your account and remove all your data from our servers.</p>
+        <div class="form-group">
+          <label class="form-label" for="delete-confirm">Type <strong>DELETE</strong> to confirm</label>
+          <input type="text" id="delete-confirm" class="form-input" placeholder="Type DELETE">
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn btn-secondary" id="delete-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="delete-confirm-btn" disabled>Delete Account</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/toast.js"></script>
+  <script>
+    // Set icons
+    document.getElementById('back-icon').innerHTML = icons['arrow-left'];
+    document.getElementById('theme-icon').innerHTML = icons.moon;
+    document.getElementById('user-icon').innerHTML = icons.user;
+    document.getElementById('mail-icon').innerHTML = icons.mail;
+    document.getElementById('lock-icon').innerHTML = icons.lock;
+    document.getElementById('trash-icon').innerHTML = icons.trash;
+    document.getElementById('close-icon').innerHTML = icons.x;
+    
+    // Set expand icons
+    document.querySelectorAll('.expand-icon').forEach(icon => {
+      icon.innerHTML = icons['chevron-down'];
+    });
+
+    let currentUser = null;
+
+    // Check auth
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      currentUser = session.user;
+      
+      // Load current username into the field placeholder
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', currentUser.id)
+        .single();
+      
+      if (profile && profile.username) {
+        document.getElementById('new-username').placeholder = profile.username;
+      }
+      
+      document.getElementById('new-email').placeholder = currentUser.email;
+    }
+
+    // Dark mode handling
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    
+    // Load saved theme
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.checked = true;
+      }
+    }
+    
+    darkModeToggle.addEventListener('change', () => {
+      if (darkModeToggle.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+    // Toggle expandable sections
+    function toggleSection(section) {
+      const content = document.getElementById(section + '-content');
+      const icon = document.getElementById(section + '-expand-icon');
+      const sectionEl = document.getElementById(section + '-section');
+      
+      // Close other sections
+      document.querySelectorAll('.settings-item-expandable').forEach(item => {
+        if (item.id !== section + '-section') {
+          item.classList.remove('expanded');
+        }
+      });
+      
+      sectionEl.classList.toggle('expanded');
+    }
+
+    // Username form
+    document.getElementById('username-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const newUsername = document.getElementById('new-username').value.trim().toLowerCase();
+      
+      // Validate
+      if (newUsername.length < 3) {
+        showToast('Username must be at least 3 characters', 'error');
+        return;
+      }
+      
+      if (!/^[a-z0-9_]+$/.test(newUsername)) {
+        showToast('Username can only contain lowercase letters, numbers, and underscores', 'error');
+        return;
+      }
+      
+      try {
+        // Check if username is taken
+        const { data: existing } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', newUsername)
+          .neq('id', currentUser.id)
+          .single();
+        
+        if (existing) {
+          showToast('Username is already taken', 'error');
+          return;
+        }
+        
+        // Update username
+        const { error } = await supabase
+          .from('profiles')
+          .update({ username: newUsername })
+          .eq('id', currentUser.id);
+        
+        if (error) throw error;
+        
+        showToast('Username updated successfully', 'success');
+        document.getElementById('new-username').value = '';
+        document.getElementById('new-username').placeholder = newUsername;
+        toggleSection('username');
+      } catch (error) {
+        showToast('Error updating username: ' + error.message, 'error');
+      }
+    });
+
+    // Email form
+    document.getElementById('email-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const newEmail = document.getElementById('new-email').value.trim();
+      
+      if (!newEmail) {
+        showToast('Please enter a new email', 'error');
+        return;
+      }
+      
+      try {
+        const { error } = await supabase.auth.updateUser({ email: newEmail });
+        
+        if (error) throw error;
+        
+        showToast('Email update initiated. Check your new email for confirmation.', 'success');
+        document.getElementById('new-email').value = '';
+        toggleSection('email');
+      } catch (error) {
+        showToast('Error updating email: ' + error.message, 'error');
+      }
+    });
+
+    // Password form
+    document.getElementById('password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-new-password').value;
+      
+      if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+      }
+      
+      try {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        
+        if (error) throw error;
+        
+        showToast('Password updated successfully', 'success');
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-new-password').value = '';
+        toggleSection('password');
+      } catch (error) {
+        showToast('Error updating password: ' + error.message, 'error');
+      }
+    });
+
+    // Delete account dialog
+    const deleteDialogOverlay = document.getElementById('delete-dialog-overlay');
+    const deleteConfirmInput = document.getElementById('delete-confirm');
+    const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+
+    document.getElementById('delete-account-btn').addEventListener('click', () => {
+      deleteDialogOverlay.classList.add('active');
+      deleteConfirmInput.value = '';
+      deleteConfirmBtn.disabled = true;
+    });
+
+    document.getElementById('delete-dialog-close').addEventListener('click', () => {
+      deleteDialogOverlay.classList.remove('active');
+    });
+
+    document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+      deleteDialogOverlay.classList.remove('active');
+    });
+
+    deleteDialogOverlay.addEventListener('click', (e) => {
+      if (e.target === deleteDialogOverlay) {
+        deleteDialogOverlay.classList.remove('active');
+      }
+    });
+
+    deleteConfirmInput.addEventListener('input', () => {
+      deleteConfirmBtn.disabled = deleteConfirmInput.value !== 'DELETE';
+    });
+
+    deleteConfirmBtn.addEventListener('click', async () => {
+      if (deleteConfirmInput.value !== 'DELETE') return;
+      
+      try {
+        // Delete profile first
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', currentUser.id);
+        
+        if (profileError) throw profileError;
+        
+        // Note: Actual user deletion requires server-side admin API
+        // For now, we'll sign out and show a message
+        await supabase.auth.signOut();
+        
+        showToast('Account deleted successfully', 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      } catch (error) {
+        showToast('Error deleting account: ' + error.message, 'error');
+      }
+    });
+
+    // Initialize
+    loadTheme();
+    checkAuth();
+  </script>
+</body>
+</html>

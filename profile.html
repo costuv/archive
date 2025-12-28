@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - ArchIve</title>
+  <!-- Preload critical resources -->
+  <link rel="preconnect" href="https://ogwtptuzvcugxctveutc.supabase.co" />
+  <link rel="dns-prefetch" href="https://ogwtptuzvcugxctveutc.supabase.co" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth-pages.css">
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+    }
+  </script>
+  <style>
+    .auth-logo {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.25rem;
+      color: var(--color-black);
+    }
+    
+    .dark-mode .auth-logo {
+      color: #ffffff;
+    }
+    
+    .auth-logo .red {
+      color: #dc2626;
+    }
+
+    .auth-card {
+      background-color: var(--color-white);
+      border: 4px solid var(--color-black);
+      box-shadow: var(--shadow-brutal);
+      padding: 2.5rem;
+    }
+    
+    .dark-mode .auth-card {
+      background-color: #0a0a0a;
+      border-color: #262626;
+      box-shadow: 8px 8px 0px 0px rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 1.5rem;
+        box-shadow: var(--shadow-brutal-sm);
+      }
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: var(--color-black);
+      border: 3px solid var(--color-black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    
+    .dark-mode .profile-avatar {
+      background-color: #171717;
+      border-color: #404040;
+    }
+    
+    .avatar-letter {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+    
+    .profile-username {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-black);
+      margin-bottom: 0.25rem;
+    }
+    
+    .dark-mode .profile-username {
+      color: #ffffff;
+    }
+    
+    .verified-badge {
+      color: #3b82f6;
+      font-size: 1rem;
+      margin-left: 0.25rem;
+    }
+    
+    .profile-role {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .role-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.625rem;
+      background-color: var(--color-gray-100);
+      border: 2px solid var(--color-black);
+      color: var(--color-black);
+    }
+    
+    .role-badge.admin {
+      background-color: var(--color-black);
+      color: var(--color-white);
+    }
+    
+    .dark-mode .role-badge {
+      background-color: #171717;
+      border-color: #404040;
+      color: #ffffff;
+    }
+    
+    .dark-mode .role-badge.admin {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    
+    .profile-details {
+      border-top: 2px solid var(--color-gray-200);
+      padding-top: 1.25rem;
+    }
+    
+    .dark-mode .profile-details {
+      border-color: #262626;
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    
+    .dark-mode .detail-row {
+      border-color: #171717;
+    }
+    
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+    
+    .detail-label {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-gray-500);
+    }
+    
+    .dark-mode .detail-label {
+      color: #737373;
+    }
+    
+    .detail-value {
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      color: var(--color-black);
+      text-align: right;
+      word-break: break-all;
+    }
+    
+    .dark-mode .detail-value {
+      color: #ffffff;
+    }
+    
+    .profile-actions {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 2px solid var(--color-gray-200);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .dark-mode .profile-actions {
+      border-color: #262626;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      border: 2px solid var(--color-black);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    
+    .btn .icon {
+      width: 1rem;
+      height: 1rem;
+    }
+    
+    .btn-secondary {
+      background-color: var(--color-white);
+      color: var(--color-black);
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--color-gray-100);
+    }
+    
+    .dark-mode .btn-secondary {
+      background-color: #0a0a0a;
+      color: #ffffff;
+      border-color: #404040;
+    }
+    
+    .dark-mode .btn-secondary:hover {
+      background-color: #171717;
+    }
+    
+    .btn-danger {
+      background-color: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+    }
+    
+    .btn-danger:hover {
+      background-color: #b91c1c;
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+
+  <div class="auth-page">
+    <div class="auth-container">
+      <a href="index.html" class="back-link">
+        <span class="icon" id="back-icon"></span>
+        Back to ArchIve
+      </a>
+
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="profile-avatar">
+            <span class="avatar-letter" id="avatar-letter">?</span>
+          </div>
+          <p class="profile-username">
+            <span id="profile-username">Loading...</span>
+            <span class="verified-badge" id="verified-badge" style="display: none;">✓</span>
+          </p>
+          <div class="profile-role">
+            <span class="role-badge" id="role-badge">Member</span>
+          </div>
+        </div>
+        
+        <div class="profile-details">
+          <div class="detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value" id="profile-email">Loading...</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Member Since</span>
+            <span class="detail-value" id="profile-created">Loading...</span>
+          </div>
+        </div>
+        
+        <div class="profile-actions">
+          <a href="settings.html" class="btn btn-secondary">
+            <span class="icon" id="settings-icon"></span>
+            Settings
+          </a>
+          
+          <button type="button" class="btn btn-danger" id="sign-out-btn">
+            <span class="icon" id="logout-icon"></span>
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/toast.js"></script>
+  <script>
+    // Set icons
+    document.getElementById('back-icon').innerHTML = icons['arrow-left'];
+    document.getElementById('settings-icon').innerHTML = icons.settings;
+    document.getElementById('logout-icon').innerHTML = icons['log-out'];
+
+    // Load profile data
+    async function loadProfile() {
+      // Wait for Supabase to be ready (max 3 seconds)
+      let attempts = 0;
+      while (!getSupabase() && attempts < 30) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      try {
+        const supabase = getSupabase();
+        
+        if (!supabase) {
+          console.error('Supabase not available');
+          showToast('Service unavailable', 'error');
+          return;
+        }
+        
+        // Get current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          showToast('Error loading session', 'error');
+          return;
+        }
+        
+        if (!session) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const user = session.user;
+        
+        // Set email
+        document.getElementById('profile-email').textContent = user.email || 'No email';
+        
+        // Set created date
+        if (user.created_at) {
+          const createdDate = new Date(user.created_at);
+          document.getElementById('profile-created').textContent = createdDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        } else {
+          document.getElementById('profile-created').textContent = 'Unknown';
+        }
+
+        // Get username, role, and verified status from profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('username, is_admin, is_verified')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.log('Profile fetch error (may be normal if no profile):', profileError);
+        }
+
+        // Set username
+        let username;
+        if (profile && profile.username) {
+          username = profile.username;
+        } else {
+          username = user.email ? user.email.split('@')[0] : 'User';
+        }
+        
+        document.getElementById('profile-username').textContent = '@' + username;
+        document.getElementById('avatar-letter').textContent = username.charAt(0).toUpperCase();
+        
+        // Set verified badge
+        if (profile && profile.is_verified) {
+          document.getElementById('verified-badge').style.display = 'inline';
+        }
+        
+        // Set role badge - check is_admin properly
+        const roleBadge = document.getElementById('role-badge');
+        if (profile && profile.is_admin === true) {
+          roleBadge.textContent = 'Administrator';
+          roleBadge.classList.add('admin');
+        } else {
+          roleBadge.textContent = 'Member';
+          roleBadge.classList.remove('admin');
+        }
+        
+      } catch (err) {
+        console.error('Error loading profile:', err);
+        showToast('Error loading profile', 'error');
+      }
+    }
+
+    // Sign out handler
+    document.getElementById('sign-out-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('sign-out-btn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      
+      try {
+        const supabase = getSupabase();
+        
+        if (!supabase) {
+          showToast('Service unavailable', 'error');
+          btn.classList.remove('loading');
+          btn.disabled = false;
+          return;
+        }
+        
+        const { error } = await supabase.auth.signOut();
+        
+        if (error) {
+          throw error;
+        }
+        
+        showToast('Signed out successfully', 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 500);
+        
+      } catch (error) {
+        console.error('Sign out error:', error);
+        showToast('Error signing out: ' + error.message, 'error');
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+
+    // Initialize
+    loadProfile();
+  </script>
+</body>
+</html>

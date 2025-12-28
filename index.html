@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArchIve - Digital Repository</title>
+  <!-- Preload critical resources -->
+  <link rel="preconnect" href="https://ogwtptuzvcugxctveutc.supabase.co" />
+  <link rel="dns-prefetch" href="https://ogwtptuzvcugxctveutc.supabase.co" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script>
+    // Apply dark mode before page renders to prevent flash
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+    }
+  </script>
+  <style>
+    /* Loading Screen Styles */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-gray-50, #f9fafb);
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .dark-mode .loading-screen {
+      background-color: #000000;
+    }
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .loading-logo {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: var(--color-black, #000000);
+    }
+    .dark-mode .loading-logo {
+      color: #ffffff;
+    }
+    .loading-logo .red {
+      color: #dc2626;
+    }
+    .loading-bar-container {
+      width: 200px;
+      height: 6px;
+      background-color: var(--color-gray-200, #e5e7eb);
+      border: 2px solid var(--color-black, #000000);
+      overflow: hidden;
+    }
+    .dark-mode .loading-bar-container {
+      background-color: #262626;
+      border-color: #404040;
+    }
+    .loading-bar {
+      height: 100%;
+      width: 40%;
+      background-color: #dc2626;
+      animation: loading-slide 1s ease-in-out infinite;
+    }
+    @keyframes loading-slide {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading-logo">
+      <span class="red">A</span>rch<span class="red">I</span>ve
+    </div>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Mobile Header (visible only on mobile) -->
+  <header class="mobile-header" id="mobile-header">
+    <div class="mobile-header-left">
+      <button class="burger-btn" id="burger-btn" aria-label="Open menu">
+        <span class="icon" data-icon="menu"></span>
+      </button>
+      <span class="mobile-logo"><span class="red">A</span>rch<span class="red">I</span>ve</span>
+    </div>
+    <div class="mobile-search-wrapper">
+      <span class="search-icon icon" data-icon="search"></span>
+      <input type="text" class="search-input" id="mobile-search-input" placeholder="Search..." />
+    </div>
+    <button class="mobile-auth-btn" id="mobile-auth-btn" aria-label="Account">
+      <span class="icon" data-icon="user"></span>
+    </button>
+  </header>
+
+  <!-- Sidebar Overlay (for mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Main App Container -->
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Sidebar Header -->
+      <div class="sidebar-header">
+        <h2 class="sidebar-title"><span class="red">A</span>rch<span class="red">I</span>ve</h2>
+        <p class="sidebar-subtitle">Digital Repository</p>
+        <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu">
+          <span class="icon" data-icon="x"></span>
+        </button>
+      </div>
+
+      <!-- Sidebar Content (Scrollable) -->
+      <div class="sidebar-content">
+        <div class="sidebar-sections">
+          <!-- File Types Section -->
+          <div class="sidebar-section">
+            <div class="section-label">File Types</div>
+            <div class="sidebar-buttons" id="file-type-filters">
+              <button class="sidebar-btn active" data-filter="all">
+                <span class="icon" data-icon="layers"></span>
+                <span class="btn-text">All Files</span>
+              </button>
+              <button class="sidebar-btn" data-filter="document">
+                <span class="icon" data-icon="file-text"></span>
+                <span class="btn-text">Documents</span>
+              </button>
+              <button class="sidebar-btn" data-filter="pdf">
+                <span class="icon" data-icon="file-type"></span>
+                <span class="btn-text">PDFs</span>
+              </button>
+              <button class="sidebar-btn" data-filter="image">
+                <span class="icon" data-icon="image"></span>
+                <span class="btn-text">Images</span>
+              </button>
+              <button class="sidebar-btn" data-filter="audio">
+                <span class="icon" data-icon="music"></span>
+                <span class="btn-text">Audio</span>
+              </button>
+              <button class="sidebar-btn" data-filter="notice">
+                <span class="icon" data-icon="alert-circle"></span>
+                <span class="btn-text">Notices</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Collections Section -->
+          <div class="sidebar-section">
+            <div class="section-header">
+              <div class="section-label">Collections</div>
+              <button class="add-folder-btn" id="add-folder-btn" style="display: none;">
+                <span class="icon" data-icon="plus"></span>
+              </button>
+            </div>
+            <div class="sidebar-buttons" id="folder-filters">
+              <!-- Folders will be rendered here -->
+            </div>
+          </div>
+
+          <!-- Tags Section -->
+          <div class="sidebar-section" id="tags-section" style="display: none;">
+            <div class="section-label">Tags</div>
+            <div class="sidebar-buttons" id="tag-filters">
+              <!-- Tags will be rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="footer-text">Est. MMXXV</div>
+        <div class="footer-text">Academic Archive</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-inner">
+          <!-- Title Row -->
+          <div class="header-top">
+            <div class="header-title-section">
+              <h1 class="header-title">Academic Archive</h1>
+              <p class="header-subtitle">Digital repository for class materials &amp; resources</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-primary" id="add-entry-btn" style="display: none;">
+                <span class="icon" data-icon="plus"></span>
+                Add Entry
+              </button>
+              <!-- Auth button (shown when logged out) -->
+              <button class="btn btn-outline" id="auth-btn">
+                <span class="icon" data-icon="user"></span>
+                <span id="auth-btn-text">Sign In</span>
+              </button>
+              <!-- User menu (shown when logged in) -->
+              <div class="user-menu-inline" id="user-menu" style="display: none;">
+                <div class="user-info">
+                  <span class="icon" data-icon="user"></span>
+                  <span id="user-display-name"></span>
+                  <span class="admin-badge" id="admin-badge" style="display: none;">Admin</span>
+                </div>
+                <button class="btn btn-outline btn-sm" id="sign-out-btn">Sign Out</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Row -->
+          <div class="header-bottom">
+            <div class="search-wrapper">
+              <span class="search-icon icon" data-icon="search"></span>
+              <input 
+                type="text" 
+                class="search-input" 
+                id="search-input"
+                placeholder="Search archive by title, description, or tags..."
+              />
+            </div>
+            <div class="filter-count">
+              <span class="icon" data-icon="filter"></span>
+              <span id="entries-count">0 entries</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Files Grid -->
+      <main class="files-container" id="files-container">
+        <!-- Files will be rendered here -->
+      </main>
+    </div>
+  </div>
+
+  <!-- File Dialog -->
+  <dialog class="dialog" id="file-dialog">
+    <div class="dialog-content dialog-lg">
+      <button class="dialog-close" id="file-dialog-close">
+        <span class="icon" data-icon="x"></span>
+      </button>
+      <h2 class="dialog-title" id="file-dialog-title">New Archive Entry</h2>
+      
+      <form id="file-form" class="dialog-form">
+        <input type="hidden" id="file-id" />
+        
+        <!-- File Upload -->
+        <div class="form-group">
+          <label class="form-label">Attach File</label>
+          <div class="upload-area" id="upload-area">
+            <input type="file" id="file-input" class="file-input" />
+            <div class="upload-content" id="upload-content">
+              <span class="icon upload-icon" data-icon="upload"></span>
+              <div class="upload-text">Click to upload or drag file</div>
+            </div>
+            <div class="upload-preview" id="upload-preview" style="display: none;">
+              <span class="file-name" id="selected-file-name"></span>
+              <button type="button" class="remove-file-btn" id="remove-file-btn">
+                <span class="icon" data-icon="x"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Title & Type Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="entry-title">Title *</label>
+            <input type="text" id="entry-title" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="entry-type">Type</label>
+            <select id="entry-type" class="form-select">
+              <option value="document">Document</option>
+              <option value="pdf">PDF</option>
+              <option value="image">Image</option>
+              <option value="audio">Audio</option>
+              <option value="notice">Notice</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Collection -->
+        <div class="form-group">
+          <label class="form-label" for="entry-folder">Collection</label>
+          <select id="entry-folder" class="form-select">
+            <option value="">Uncategorized</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label" for="entry-description">Description</label>
+          <textarea id="entry-description" class="form-textarea" rows="4"></textarea>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <div class="tag-input-wrapper">
+            <input type="text" id="tag-input" class="form-input tag-input" placeholder="Add tag..." />
+            <button type="button" class="btn btn-primary btn-sm" id="add-tag-btn">
+              <span class="icon" data-icon="plus"></span>
+            </button>
+          </div>
+          <div class="tags-list" id="tags-list">
+            <!-- Tags will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-outline" id="file-dialog-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="file-dialog-submit">Add to Archive</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Folder Dialog -->
+  <dialog class="dialog" id="folder-dialog">
+    <div class="dialog-content dialog-sm">
+      <button class="dialog-close" id="folder-dialog-close">
+        <span class="icon" data-icon="x"></span>
+      </button>
+      <h2 class="dialog-title">New Collection</h2>
+      
+      <form id="folder-form" class="dialog-form">
+        <div class="form-group">
+          <label class="form-label" for="folder-name">Collection Name</label>
+          <input type="text" id="folder-name" class="form-input" placeholder="e.g., Physics 101" required />
+        </div>
+
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-outline" id="folder-dialog-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Mobile Floating Add Button (Admin only) -->
+  <button class="mobile-fab" id="mobile-add-btn" aria-label="Add Entry">
+    <span class="icon" data-icon="plus"></span>
+  </button>
+
+  <!-- Scripts -->
+  <script src="js/icons.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
