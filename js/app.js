@@ -376,6 +376,15 @@ async function handleFileFormSubmit(e) {
   }
 
   // For new files, upload each and insert into table
+  // Ensure user/auth is ready and has permission to upload (prevents silent failures on mobile)
+  if (isSupabaseConfigured()) {
+    // `getIsAdmin` defined in `auth.js` returns boolean
+    if (typeof getIsAdmin === 'function' && !getIsAdmin()) {
+      toastError('You must be signed in as an admin to upload files');
+      return;
+    }
+  }
+
   let allSuccess = true;
   for (let i = 0; i < filesToUpload.length; i++) {
     const file = filesToUpload[i];
