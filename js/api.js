@@ -75,39 +75,73 @@ async function createFile(fileData) {
   if (!supabase) {
     return createFileInLocalStorage(fileData);
   }
+  // Attempt insert with retries to handle transient network/RLS issues
+  const maxAttempts = 3;
+  let lastError = null;
 
+  // Safely get session info for logging / RLS diagnostics
   try {
-    // Check auth status
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('Current session:', session ? 'Authenticated as ' + session.user.email : 'Not authenticated');
-    console.log('Creating file in database:', fileData);
-    
-    const { data, error } = await supabase
-      .from('files')
-      .insert({
-        title: fileData.title,
-        description: fileData.description,
-        type: fileData.type,
-        folder_id: fileData.folderId || null,
-        tags: fileData.tags || [],
-        file_url: fileData.fileUrl,
-        thumbnail_url: fileData.thumbnailUrl,
-        file_name: fileData.fileName,
-        file_size: fileData.fileSize
-      })
-      .select()
-      .single();
+    const sessionResp = await supabase.auth.getSession();
+    const session = sessionResp?.data?.session || null;
+    console.log('Current session:', session ? 'Authenticated as ' + (session.user?.email || session.user?.id) : 'Not authenticated');
+  } catch (e) {
+    console.warn('Could not determine auth session before insert:', e?.message || e);
+  }
 
-    if (error) {
-      console.error('Database INSERT error:', error);
-      return { success: false, error: error.message };
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`Creating file in database (attempt ${attempt}):`, fileData.title || fileData.fileName);
+      const resp = await supabase
+        .from('files')
+        .insert({
+          title: fileData.title,
+          description: fileData.description,
+          type: fileData.type,
+          folder_id: fileData.folderId || null,
+          tags: fileData.tags || [],
+          file_url: fileData.fileUrl,
+          thumbnail_url: fileData.thumbnailUrl,
+          file_name: fileData.fileName,
+          file_size: fileData.fileSize
+        })
+        .select();
+
+      const { data, error } = resp;
+      if (error) {
+        lastError = error;
+        console.error(`Database INSERT error (attempt ${attempt}):`, error);
+        // If it's a permission/authorization error, don't retry
+        const msg = (error && (error.message || '')).toLowerCase();
+        if (msg.includes('permission') || msg.includes('forbidden') || msg.includes('not authorized') || msg.includes('duplicate')) {
+          return { success: false, error: error.message || JSON.stringify(error) };
+        }
+        // otherwise retry after delay
+      } else if (data && data.length > 0) {
+        // If insert returns array, return first row
+        const created = Array.isArray(data) ? data[0] : data;
+        console.log('File created successfully:', created);
+        return { success: true, data: created };
+      } else {
+        // Unexpected empty response
+        lastError = { message: 'Empty response from insert' };
+        console.error('Empty response from insert', resp);
+      }
+    } catch (err) {
+      lastError = err;
+      console.error(`createFile exception (attempt ${attempt}):`, err);
     }
 
-    console.log('File created successfully:', data);
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+    // Exponential backoff before next attempt
+    if (attempt < maxAttempts) {
+      const waitMs = 250 * attempt;
+      await new Promise(resolve => setTimeout(resolve, waitMs));
+      console.log(`Retrying createFile (attempt ${attempt + 1}) after ${waitMs}ms`);
+    }
   }
+
+  // All attempts failed
+  const message = (lastError && (lastError.message || JSON.stringify(lastError))) || 'Unknown error';
+  return { success: false, error: message };
 }
 
 /**

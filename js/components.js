@@ -300,6 +300,7 @@ function closeFileDialog() {
 // ============================================
 
 let selectedFile = null;
+let selectedFiles = [];
 
 /**
  * Show file preview in upload area
@@ -312,7 +313,11 @@ function showFilePreview(fileName) {
 
   uploadContent.style.display = 'none';
   uploadPreview.style.display = 'flex';
-  fileNameSpan.textContent = fileName;
+  if (Array.isArray(fileName)) {
+    fileNameSpan.textContent = fileName.join(', ');
+  } else {
+    fileNameSpan.textContent = fileName;
+  }
 }
 
 /**
@@ -327,34 +332,43 @@ function resetFileUpload() {
   uploadPreview.style.display = 'none';
   fileInput.value = '';
   selectedFile = null;
+  selectedFiles = [];
 }
 
 /**
  * Handle file selection
  * @param {File} file 
  */
-function handleFileSelect(file) {
-  if (!file) return;
-  
-  selectedFile = file;
-  showFilePreview(file.name);
+function handleFileSelect(fileOrList) {
+  if (!fileOrList) return;
 
-  // Auto-detect type based on file extension
-  const ext = file.name.split('.').pop().toLowerCase();
-  const typeSelect = document.getElementById('entry-type');
-  
-  if (['pdf'].includes(ext)) {
-    typeSelect.value = 'pdf';
-  } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
-    typeSelect.value = 'image';
-  } else if (['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac', 'wma'].includes(ext)) {
-    typeSelect.value = 'audio';
-  } else if (['mp4', 'webm', 'mov', 'avi', 'mkv', 'wmv', 'flv'].includes(ext)) {
-    typeSelect.value = 'video';
-  } else if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext)) {
-    typeSelect.value = 'document';
-  } else if (['html', 'css', 'js', 'py', 'java', 'c', 'cpp', 'rb', 'php', 'ts', 'json', 'xml', 'ipynb'].includes(ext)) {
-    typeSelect.value = 'codes';
+  // Accept FileList or single File
+  if (fileOrList instanceof FileList || Array.isArray(fileOrList)) {
+    selectedFiles = Array.from(fileOrList);
+    selectedFile = selectedFiles[0] || null;
+    showFilePreview(selectedFiles.map(f => f.name));
+  } else {
+    selectedFile = fileOrList;
+    selectedFiles = [fileOrList];
+    showFilePreview(fileOrList.name);
+
+    // Auto-detect type based on file extension for single file
+    const ext = fileOrList.name.split('.').pop().toLowerCase();
+    const typeSelect = document.getElementById('entry-type');
+    if (!typeSelect) return;
+    if (['pdf'].includes(ext)) {
+      typeSelect.value = 'pdf';
+    } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+      typeSelect.value = 'image';
+    } else if (['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac', 'wma'].includes(ext)) {
+      typeSelect.value = 'audio';
+    } else if (['mp4', 'webm', 'mov', 'avi', 'mkv', 'wmv', 'flv'].includes(ext)) {
+      typeSelect.value = 'video';
+    } else if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext)) {
+      typeSelect.value = 'document';
+    } else if (['html', 'css', 'js', 'py', 'java', 'c', 'cpp', 'rb', 'php', 'ts', 'json', 'xml', 'ipynb'].includes(ext)) {
+      typeSelect.value = 'codes';
+    }
   }
 }
 

@@ -326,47 +326,75 @@ async function handleDeleteFile(fileId) {
  */
 async function handleFileFormSubmit(e) {
   e.preventDefault();
-  
+
   const fileId = document.getElementById('file-id').value;
   const title = document.getElementById('entry-title').value.trim();
   const type = document.getElementById('entry-type').value;
   const folderId = document.getElementById('entry-folder').value || null;
   const description = document.getElementById('entry-description').value.trim();
   const tags = getCurrentTags();
-  
-  if (!title) {
-    toastError('Title is required');
+
+  // Use `selectedFiles` (multi) or `selectedFile` (single) from components.js
+  let filesToUpload = [];
+  if (typeof selectedFiles !== 'undefined' && Array.isArray(selectedFiles) && selectedFiles.length > 0) {
+    filesToUpload = selectedFiles;
+  } else if (typeof selectedFile !== 'undefined' && selectedFile) {
+    filesToUpload = [selectedFile];
+  }
+  if (!filesToUpload || filesToUpload.length === 0) {
+    // No new file selected, just update metadata or show error
+    if (fileId) {
+      // Update existing file metadata
+      const fileData = {
+        title,
+        type,
+        folderId,
+        folderName: (appState.folders.find(f => f.id === folderId)?.name) || null,
+        description,
+        tags
+      };
+      const result = await updateFile(fileId, fileData);
+      if (result.success) {
+        const index = appState.files.findIndex(f => f.id === fileId);
+        if (index !== -1) {
+          appState.files[index] = {
+            ...appState.files[index],
+            ...fileData,
+            updatedAt: new Date()
+          };
+        }
+        toastSuccess('Entry updated successfully');
+        closeFileDialog();
+        await loadData();
+      } else {
+        toastError(result.error || 'Failed to update entry');
+      }
+    } else {
+      toastError('Please select at least one file to upload.');
+    }
     return;
   }
-  
-  // Prepare file data
-  let fileUrl = appState.editingFile?.fileUrl;
-  let thumbnailUrl = appState.editingFile?.thumbnailUrl;
-  let fileName = appState.editingFile?.fileName;
-  let fileSize = appState.editingFile?.fileSize;
-  
-  // Handle file upload if a new file is selected
-  if (selectedFile) {
-    // Show progress bar
+
+  // For new files, upload each and insert into table
+  let allSuccess = true;
+  for (let i = 0; i < filesToUpload.length; i++) {
+    const file = filesToUpload[i];
+
+    // Show progress bar for each file
     const progressContainer = document.getElementById('upload-progress');
     const progressFill = document.getElementById('upload-progress-fill');
     const progressPercent = document.getElementById('upload-progress-percent');
     const progressSpeed = document.getElementById('upload-progress-speed');
-    
     if (progressContainer) {
       progressContainer.style.display = 'block';
       progressFill.style.width = '0%';
       progressPercent.textContent = '0%';
       progressSpeed.textContent = '0 KB/s';
     }
-    
-    // Progress callback
     const onProgress = (percent, speed) => {
       if (progressContainer) {
         progressFill.style.width = `${percent}%`;
         progressPercent.textContent = `${percent}%`;
-        
-        // Format speed
         let speedText;
         if (speed >= 1024 * 1024) {
           speedText = `${(speed / (1024 * 1024)).toFixed(1)} MB/s`;
@@ -378,85 +406,41 @@ async function handleFileFormSubmit(e) {
         progressSpeed.textContent = speedText;
       }
     };
-    
-    const uploadResult = await uploadFile(selectedFile, onProgress);
-    
-    // Hide progress bar
-    if (progressContainer) {
-      progressContainer.style.display = 'none';
+    const uploadResult = await uploadFile(file, onProgress);
+    if (progressContainer) progressContainer.style.display = 'none';
+    if (!uploadResult.success) {
+      toastError(uploadResult.error || `Failed to upload file: ${file.name}`);
+      allSuccess = false;
+      continue;
     }
-    
-    if (uploadResult.success) {
-      fileUrl = uploadResult.url;
-      fileName = selectedFile.name;
-      fileSize = formatFileSize(selectedFile.size);
-      
-      // Use same URL for thumbnail if image
-      if (type === 'image') {
-        thumbnailUrl = uploadResult.url;
-      }
-    } else {
-      toastError(uploadResult.error || 'Failed to upload file');
-      return;
+    // Prepare file data for DB insert
+    const folder = appState.folders.find(f => f.id === folderId);
+    const fileData = {
+      title: filesToUpload.length === 1 ? title : file.name,
+      type,
+      folderId,
+      folderName: folder?.name || null,
+      description,
+      tags,
+      fileUrl: uploadResult.url,
+      thumbnailUrl: (type === 'image') ? uploadResult.url : null,
+      fileName: file.name,
+      fileSize: formatFileSize(file.size)
+    };
+    const result = await createFile(fileData);
+    if (!result.success) {
+      toastError(result.error || `Failed to save entry for file: ${file.name}`);
+      allSuccess = false;
+      continue;
     }
+    toastSuccess(`Entry added: ${fileData.title}`);
   }
-  
-  // Get folder name
-  const folder = appState.folders.find(f => f.id === folderId);
-  const folderName = folder?.name || null;
-  
-  const fileData = {
-    title,
-    type,
-    folderId,
-    folderName,
-    description,
-    tags,
-    fileUrl,
-    thumbnailUrl,
-    fileName,
-    fileSize
-  };
-  
-  let result;
-  
-  if (fileId) {
-    // Update existing file
-    result = await updateFile(fileId, fileData);
-    if (result.success) {
-      const index = appState.files.findIndex(f => f.id === fileId);
-      if (index !== -1) {
-        appState.files[index] = {
-          ...appState.files[index],
-          ...fileData,
-          updatedAt: new Date()
-        };
-      }
-      toastSuccess('Entry updated successfully');
-    }
-  } else {
-    // Create new file
-    result = await createFile(fileData);
-    if (result.success) {
-      const newFile = {
-        id: result.data?.id || crypto.randomUUID(),
-        ...fileData,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      appState.files.unshift(newFile);
-      toastSuccess('Entry added successfully');
-    }
+  closeFileDialog();
+  await loadData();
+  if (allSuccess) {
+    toastSuccess('All files uploaded and saved successfully');
   }
-  
-  if (result.success) {
-    appState.folders = recalculateFolderCounts(appState.files, appState.folders);
-    applyFilters();
-    renderSidebar();
-    closeFileDialog();
-  } else {
-    toastError(result.error || 'Failed to save entry');
-  }
+// ...function end
 }
 
 /**
@@ -602,10 +586,10 @@ function setupEventListeners() {
     if (e.target.id === 'file-dialog') closeFileDialog();
   });
   
-  // File upload
+  // File upload (support multiple files)
   document.getElementById('file-input')?.addEventListener('change', (e) => {
-    const file = e.target.files?.[0];
-    if (file) handleFileSelect(file);
+    const files = e.target.files;
+    if (files && files.length > 0) handleFileSelect(files);
   });
   
   document.getElementById('remove-file-btn')?.addEventListener('click', resetFileUpload);
