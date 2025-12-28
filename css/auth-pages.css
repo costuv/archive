@@ -1,0 +1,664 @@
+/* ============================================
+   Auth Pages Shared Styles
+   (Login, Signup, Profile, Settings)
+   ============================================ */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-color: var(--color-gray-50);
+}
+
+/* Mobile: position container at top */
+@media (max-width: 768px) {
+  .auth-page {
+    align-items: flex-start;
+    padding-top: 1.5rem;
+  }
+}
+
+.dark-mode .auth-page {
+  background-color: #000000;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.settings-container {
+  max-width: 500px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--color-black);
+}
+
+.dark-mode .back-link {
+  color: #a3a3a3;
+}
+
+.dark-mode .back-link:hover {
+  color: #ffffff;
+}
+
+.back-link .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.dark-mode .auth-title {
+  color: #ffffff;
+}
+
+.auth-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.dark-mode .auth-subtitle {
+  color: #737373;
+}
+
+/* ============================================
+   Profile Page Specific Styles
+   ============================================ */
+
+.profile-card {
+  background-color: var(--color-white);
+  border: 2px solid var(--color-black);
+  box-shadow: var(--shadow-brutal);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.dark-mode .profile-card {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-600);
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--color-black);
+  border: 3px solid var(--color-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.dark-mode .profile-avatar {
+  background-color: var(--color-gray-700);
+  border-color: var(--color-gray-500);
+}
+
+.avatar-letter {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.profile-info {
+  text-align: left;
+}
+
+.profile-field {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.dark-mode .profile-field {
+  border-color: var(--color-gray-700);
+}
+
+.profile-field:last-child {
+  border-bottom: none;
+}
+
+.profile-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-500);
+  margin-bottom: 0.25rem;
+}
+
+.profile-value {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--color-black);
+  margin: 0;
+}
+
+.dark-mode .profile-value {
+  color: var(--color-white);
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ============================================
+   Settings Page Specific Styles
+   ============================================ */
+
+.settings-section {
+  background-color: var(--color-white);
+  border: 2px solid var(--color-black);
+  box-shadow: var(--shadow-brutal);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.dark-mode .settings-section {
+  background-color: #0a0a0a;
+  border-color: #262626;
+  box-shadow: 8px 8px 0px 0px rgba(255, 255, 255, 0.1);
+}
+
+.settings-section-danger {
+  border-color: var(--color-red);
+}
+
+.settings-section-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-500);
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-gray-200);
+  margin: 0;
+}
+
+.dark-mode .settings-section-title {
+  color: #a3a3a3;
+  border-color: #171717;
+}
+
+.settings-section-danger .settings-section-title {
+  color: var(--color-red);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.dark-mode .settings-item {
+  border-color: #171717;
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.settings-item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settings-item-info > .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-gray-600);
+  flex-shrink: 0;
+}
+
+.dark-mode .settings-item-info > .icon {
+  color: #a3a3a3;
+}
+
+.settings-item-label {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-black);
+  margin: 0;
+}
+
+.dark-mode .settings-item-label {
+  color: #ffffff;
+}
+
+.settings-item-desc {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  margin: 0.125rem 0 0;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-gray-300);
+  border: 2px solid var(--color-black);
+  transition: 0.2s;
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--color-white);
+  border: 2px solid var(--color-black);
+  transition: 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--color-black);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+  background-color: var(--color-white);
+}
+
+.dark-mode .toggle-slider {
+  background-color: #262626;
+  border-color: #404040;
+}
+
+.dark-mode .toggle-slider::before {
+  border-color: #404040;
+  background-color: #ffffff;
+}
+
+.dark-mode .toggle-switch input:checked + .toggle-slider {
+  background-color: #ffffff;
+}
+
+.dark-mode .toggle-switch input:checked + .toggle-slider::before {
+  background-color: #000000;
+}
+
+/* Expandable Settings Items */
+.settings-item-expandable {
+  display: block;
+  padding: 0;
+}
+
+.settings-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.settings-item-header:hover {
+  background-color: var(--color-gray-100);
+}
+
+.dark-mode .settings-item-header:hover {
+  background-color: #171717;
+}
+
+.expand-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-gray-400);
+  transition: transform 0.2s ease;
+}
+
+.settings-item-expandable.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+.settings-item-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 1rem;
+  background-color: var(--color-gray-50);
+}
+
+.dark-mode .settings-item-content {
+  background-color: #000000;
+}
+
+.settings-item-expandable.expanded .settings-item-content {
+  max-height: 300px;
+  padding: 1rem;
+}
+
+/* Delete Dialog */
+.delete-dialog {
+  max-width: 400px;
+}
+
+.delete-warning {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--color-gray-700);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.dark-mode .delete-warning {
+  color: var(--color-gray-300);
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--color-black);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+}
+
+.btn-primary {
+  background-color: var(--color-black);
+  color: var(--color-white);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.btn-primary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.dark-mode .btn-primary {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .btn-primary:hover {
+  box-shadow: 6px 6px 0px 0px rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary {
+  background-color: var(--color-white);
+  color: var(--color-black);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-gray-100);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.dark-mode .btn-secondary {
+  background-color: #0a0a0a;
+  color: #ffffff;
+  border-color: #262626;
+  box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .btn-secondary:hover {
+  background-color: #171717;
+  box-shadow: 6px 6px 0px 0px rgba(255, 255, 255, 0.15);
+}
+
+.btn-danger {
+  background-color: var(--color-red);
+  color: var(--color-white);
+  border-color: var(--color-red);
+  box-shadow: 4px 4px 0px 0px rgba(220, 38, 38, 0.3);
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px rgba(220, 38, 38, 0.4);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================
+   Form Elements
+   ============================================ */
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-600);
+  margin-bottom: 0.5rem;
+}
+
+.dark-mode .form-label {
+  color: #a3a3a3;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  border: 2px solid var(--color-black);
+  background-color: var(--color-white);
+  transition: box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.dark-mode .form-input {
+  background-color: #000000;
+  border-color: #262626;
+  color: #ffffff;
+}
+
+.dark-mode .form-input:focus {
+  box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.2);
+}
+
+.form-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  margin-top: 0.25rem;
+}
+
+/* ============================================
+   Dialog Overlay (for settings page)
+   ============================================ */
+
+.dialog-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.dialog-overlay.active {
+  display: flex;
+}
+
+.dialog {
+  background-color: var(--color-white);
+  border: 2px solid var(--color-black);
+  box-shadow: var(--shadow-brutal);
+  width: 100%;
+  max-width: 500px;
+}
+
+.dark-mode .dialog {
+  background-color: #0a0a0a;
+  border-color: #262626;
+  box-shadow: 8px 8px 0px 0px rgba(255, 255, 255, 0.1);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 2px solid var(--color-black);
+}
+
+.dark-mode .dialog-header {
+  border-color: #262626;
+}
+
+.dialog-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.dark-mode .dialog-title {
+  color: #ffffff;
+}
+
+.dialog-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-gray-600);
+}
+
+.dialog-close:hover {
+  color: var(--color-black);
+}
+
+.dark-mode .dialog-close {
+  color: var(--color-gray-400);
+}
+
+.dark-mode .dialog-close:hover {
+  color: var(--color-white);
+}
+
+.dialog-close .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.dialog-content {
+  padding: 1rem;
+}
+
+.dialog-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1rem;
+  border-top: 2px solid var(--color-black);
+}
+
+.dark-mode .dialog-footer {
+  border-color: var(--color-gray-600);
+}
+
+/* ============================================
+   Dark Mode Global Overrides
+   ============================================ */
+
+.dark-mode {
+  background-color: var(--color-gray-900);
+  color: var(--color-white);
+}
