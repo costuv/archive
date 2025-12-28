@@ -405,8 +405,65 @@ input, select, textarea {
 }
 
 .sidebar-footer {
-  padding: 1rem;
+  padding: 0;
+}
+
+.sidebar-footer-links {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem;
+}
+
+.sidebar-footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-gray-600);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-footer-btn:hover {
+  color: var(--color-black);
+  background-color: var(--color-gray-100);
+}
+
+.dark-mode .sidebar-footer-btn {
+  color: #a3a3a3;
+}
+
+.dark-mode .sidebar-footer-btn:hover {
+  color: #ffffff;
+  background-color: #262626;
+}
+
+.sidebar-footer-btn .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Profile button only visible on mobile */
+.sidebar-footer-btn.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar-footer-btn.mobile-only {
+    display: flex;
+  }
+}
+
+.sidebar-footer-info {
+  padding: 0.75rem 1rem;
   border-top: 2px solid var(--color-black);
+}
+
+.dark-mode .sidebar-footer-info {
+  border-color: #262626;
 }
 
 .footer-text {
@@ -414,6 +471,38 @@ input, select, textarea {
   font-size: 0.75rem;
   color: var(--color-gray-500);
   line-height: 1.5;
+}
+
+/* User info link in header */
+.user-info-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  color: var(--color-black);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  border: 2px solid var(--color-black);
+  transition: all 0.2s ease;
+}
+
+.user-info-link:hover {
+  background-color: var(--color-gray-100);
+}
+
+.dark-mode .user-info-link {
+  color: #ffffff;
+  border-color: #404040;
+}
+
+.dark-mode .user-info-link:hover {
+  background-color: #262626;
+}
+
+.user-info-link .icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Mobile Sidebar Close Button */

@@ -181,8 +181,20 @@
 
       <!-- Sidebar Footer -->
       <div class="sidebar-footer">
-        <div class="footer-text">Est. 2025</div>
-        <div class="footer-text">Academic Archive</div>
+        <div class="sidebar-footer-links">
+          <a href="profile.html" class="sidebar-footer-btn mobile-only" id="sidebar-profile-btn">
+            <span class="icon" data-icon="user"></span>
+            <span>Profile</span>
+          </a>
+          <a href="settings.html" class="sidebar-footer-btn">
+            <span class="icon" data-icon="settings"></span>
+            <span>Settings</span>
+          </a>
+        </div>
+        <div class="sidebar-footer-info">
+          <div class="footer-text">Est. 2025</div>
+          <div class="footer-text">Academic Archive</div>
+        </div>
       </div>
     </aside>
 
@@ -209,12 +221,11 @@
               </button>
               <!-- User menu (shown when logged in) -->
               <div class="user-menu-inline" id="user-menu" style="display: none;">
-                <div class="user-info">
+                <a href="profile.html" class="user-info-link">
                   <span class="icon" data-icon="user"></span>
                   <span id="user-display-name"></span>
                   <span class="admin-badge" id="admin-badge" style="display: none;">Admin</span>
-                </div>
-                <button class="btn btn-outline btn-sm" id="sign-out-btn">Sign Out</button>
+                </a>
               </div>
             </div>
           </div>
