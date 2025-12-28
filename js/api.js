@@ -1,0 +1,478 @@
+/**
+ * Data API Module
+ * Handles all CRUD operations for files and folders with Supabase
+ */
+
+// ============================================
+// FILES API
+// ============================================
+
+/**
+ * Get all files from database
+ * @returns {Promise<Array>}
+ */
+async function getFiles() {
+  const supabase = getSupabase();
+  if (!supabase) {
+    console.warn('Supabase not initialized, using localStorage fallback');
+    return getFilesFromLocalStorage();
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('files')
+      .select(`
+        *,
+        folders:folder_id (
+          id,
+          name
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching files:', error);
+      return getFilesFromLocalStorage();
+    }
+
+    // Transform data to match expected format
+    return data.map(file => ({
+      id: file.id,
+      title: file.title,
+      description: file.description,
+      type: file.type,
+      folderId: file.folder_id,
+      folderName: file.folders?.name,
+      tags: file.tags || [],
+      fileUrl: file.file_url,
+      thumbnailUrl: file.thumbnail_url,
+      fileName: file.file_name,
+      fileSize: file.file_size,
+      createdAt: new Date(file.created_at),
+      updatedAt: new Date(file.updated_at)
+    }));
+  } catch (err) {
+    console.error('Error in getFiles:', err);
+    return getFilesFromLocalStorage();
+  }
+}
+
+/**
+ * Create a new file entry
+ * @param {Object} fileData 
+ * @returns {Promise<{success: boolean, data?: Object, error?: string}>}
+ */
+async function createFile(fileData) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return createFileInLocalStorage(fileData);
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('files')
+      .insert({
+        title: fileData.title,
+        description: fileData.description,
+        type: fileData.type,
+        folder_id: fileData.folderId || null,
+        tags: fileData.tags || [],
+        file_url: fileData.fileUrl,
+        thumbnail_url: fileData.thumbnailUrl,
+        file_name: fileData.fileName,
+        file_size: fileData.fileSize
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Update an existing file entry
+ * @param {string} id 
+ * @param {Object} fileData 
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function updateFile(id, fileData) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return updateFileInLocalStorage(id, fileData);
+  }
+
+  try {
+    const { error } = await supabase
+      .from('files')
+      .update({
+        title: fileData.title,
+        description: fileData.description,
+        type: fileData.type,
+        folder_id: fileData.folderId || null,
+        tags: fileData.tags || [],
+        file_url: fileData.fileUrl,
+        thumbnail_url: fileData.thumbnailUrl,
+        file_name: fileData.fileName,
+        file_size: fileData.fileSize,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Delete a file entry
+ * @param {string} id 
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function deleteFile(id) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return deleteFileFromLocalStorage(id);
+  }
+
+  try {
+    // First get the file to check for storage files
+    const { data: file } = await supabase
+      .from('files')
+      .select('file_url, thumbnail_url')
+      .eq('id', id)
+      .single();
+
+    // Delete from storage if applicable
+    if (file?.file_url) {
+      await deleteStorageFile(file.file_url);
+    }
+    if (file?.thumbnail_url && file.thumbnail_url !== file.file_url) {
+      await deleteStorageFile(file.thumbnail_url);
+    }
+
+    // Delete from database
+    const { error } = await supabase
+      .from('files')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ============================================
+// FOLDERS API
+// ============================================
+
+/**
+ * Get all folders from database
+ * @returns {Promise<Array>}
+ */
+async function getFolders() {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return getFoldersFromLocalStorage();
+  }
+
+  try {
+    // Get folders
+    const { data: folders, error } = await supabase
+      .from('folders')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching folders:', error);
+      return getFoldersFromLocalStorage();
+    }
+
+    // Get file counts per folder
+    const { data: fileCounts } = await supabase
+      .from('files')
+      .select('folder_id')
+      .not('folder_id', 'is', null);
+
+    // Calculate counts
+    const countMap = {};
+    fileCounts?.forEach(f => {
+      countMap[f.folder_id] = (countMap[f.folder_id] || 0) + 1;
+    });
+
+    return folders.map(folder => ({
+      id: folder.id,
+      name: folder.name,
+      count: countMap[folder.id] || 0
+    }));
+  } catch (err) {
+    console.error('Error in getFolders:', err);
+    return getFoldersFromLocalStorage();
+  }
+}
+
+/**
+ * Create a new folder
+ * @param {string} name 
+ * @returns {Promise<{success: boolean, data?: Object, error?: string}>}
+ */
+async function createFolder(name) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return createFolderInLocalStorage(name);
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('folders')
+      .insert({ name })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: { id: data.id, name: data.name, count: 0 } };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Delete a folder
+ * @param {string} id 
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function deleteFolder(id) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return deleteFolderFromLocalStorage(id);
+  }
+
+  try {
+    const { error } = await supabase
+      .from('folders')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ============================================
+// FILE STORAGE API
+// ============================================
+
+/**
+ * Upload a file to Supabase Storage
+ * @param {File} file 
+ * @returns {Promise<{success: boolean, url?: string, error?: string}>}
+ */
+async function uploadFile(file) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    // Return object URL for local testing
+    return { success: true, url: URL.createObjectURL(file) };
+  }
+
+  try {
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `uploads/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('archive-files')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      return { success: false, error: uploadError.message };
+    }
+
+    // Get public URL
+    const { data } = supabase.storage
+      .from('archive-files')
+      .getPublicUrl(filePath);
+
+    return { success: true, url: data.publicUrl };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Delete a file from Supabase Storage
+ * @param {string} url 
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function deleteStorageFile(url) {
+  const supabase = getSupabase();
+  if (!supabase || !url.includes('supabase')) {
+    return { success: true };
+  }
+
+  try {
+    // Extract path from URL
+    const urlParts = url.split('/archive-files/');
+    if (urlParts.length < 2) return { success: true };
+    
+    const filePath = urlParts[1];
+
+    const { error } = await supabase.storage
+      .from('archive-files')
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Error deleting storage file:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Format file size for display
+ * @param {number} bytes 
+ * @returns {string}
+ */
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+// ============================================
+// LOCALSTORAGE FALLBACK
+// ============================================
+
+function getFilesFromLocalStorage() {
+  const stored = localStorage.getItem('archiveFiles');
+  if (!stored) return [];
+  
+  try {
+    const files = JSON.parse(stored);
+    return files.map(f => ({
+      ...f,
+      createdAt: new Date(f.createdAt),
+      updatedAt: new Date(f.updatedAt)
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function saveFilesToLocalStorage(files) {
+  localStorage.setItem('archiveFiles', JSON.stringify(files));
+}
+
+function createFileInLocalStorage(fileData) {
+  const files = getFilesFromLocalStorage();
+  const newFile = {
+    id: crypto.randomUUID(),
+    ...fileData,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  files.unshift(newFile);
+  saveFilesToLocalStorage(files);
+  return { success: true, data: newFile };
+}
+
+function updateFileInLocalStorage(id, fileData) {
+  const files = getFilesFromLocalStorage();
+  const index = files.findIndex(f => f.id === id);
+  if (index === -1) {
+    return { success: false, error: 'File not found' };
+  }
+  files[index] = { ...files[index], ...fileData, updatedAt: new Date() };
+  saveFilesToLocalStorage(files);
+  return { success: true };
+}
+
+function deleteFileFromLocalStorage(id) {
+  const files = getFilesFromLocalStorage();
+  const filtered = files.filter(f => f.id !== id);
+  saveFilesToLocalStorage(filtered);
+  return { success: true };
+}
+
+function getFoldersFromLocalStorage() {
+  const stored = localStorage.getItem('archiveFolders');
+  if (!stored) return [];
+  
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+function saveFoldersToLocalStorage(folders) {
+  localStorage.setItem('archiveFolders', JSON.stringify(folders));
+}
+
+function createFolderInLocalStorage(name) {
+  const folders = getFoldersFromLocalStorage();
+  const newFolder = {
+    id: crypto.randomUUID(),
+    name,
+    count: 0
+  };
+  folders.push(newFolder);
+  saveFoldersToLocalStorage(folders);
+  return { success: true, data: newFolder };
+}
+
+function deleteFolderFromLocalStorage(id) {
+  const folders = getFoldersFromLocalStorage();
+  const filtered = folders.filter(f => f.id !== id);
+  saveFoldersToLocalStorage(filtered);
+  return { success: true };
+}
+
+/**
+ * Recalculate folder counts
+ * @param {Array} files 
+ * @param {Array} folders 
+ * @returns {Array} Updated folders with correct counts
+ */
+function recalculateFolderCounts(files, folders) {
+  const countMap = {};
+  files.forEach(f => {
+    if (f.folderId) {
+      countMap[f.folderId] = (countMap[f.folderId] || 0) + 1;
+    }
+  });
+  
+  return folders.map(folder => ({
+    ...folder,
+    count: countMap[folder.id] || 0
+  }));
+}
