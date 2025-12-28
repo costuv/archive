@@ -145,6 +145,10 @@
                 <span class="icon" data-icon="music"></span>
                 <span class="btn-text">Audio</span>
               </button>
+              <button class="sidebar-btn" data-filter="video">
+                <span class="icon" data-icon="video"></span>
+                <span class="btn-text">Video</span>
+              </button>
               <button class="sidebar-btn" data-filter="notice">
                 <span class="icon" data-icon="alert-circle"></span>
                 <span class="btn-text">Notices</span>
@@ -267,6 +271,15 @@
                 <span class="icon" data-icon="x"></span>
               </button>
             </div>
+            <div class="upload-progress" id="upload-progress" style="display: none;">
+              <div class="upload-progress-bar">
+                <div class="upload-progress-fill" id="upload-progress-fill"></div>
+              </div>
+              <div class="upload-progress-info">
+                <span id="upload-progress-percent">0%</span>
+                <span id="upload-progress-speed">0 KB/s</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -283,6 +296,7 @@
               <option value="pdf">PDF</option>
               <option value="image">Image</option>
               <option value="audio">Audio</option>
+              <option value="video">Video</option>
               <option value="notice">Notice</option>
             </select>
           </div>
@@ -362,4 +376,3 @@
   <script src="js/app.js"></script>
 </body>
 </html>
-

@@ -334,7 +334,45 @@ async function handleFileFormSubmit(e) {
   
   // Handle file upload if a new file is selected
   if (selectedFile) {
-    const uploadResult = await uploadFile(selectedFile);
+    // Show progress bar
+    const progressContainer = document.getElementById('upload-progress');
+    const progressFill = document.getElementById('upload-progress-fill');
+    const progressPercent = document.getElementById('upload-progress-percent');
+    const progressSpeed = document.getElementById('upload-progress-speed');
+    
+    if (progressContainer) {
+      progressContainer.style.display = 'block';
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+      progressSpeed.textContent = '0 KB/s';
+    }
+    
+    // Progress callback
+    const onProgress = (percent, speed) => {
+      if (progressContainer) {
+        progressFill.style.width = `${percent}%`;
+        progressPercent.textContent = `${percent}%`;
+        
+        // Format speed
+        let speedText;
+        if (speed >= 1024 * 1024) {
+          speedText = `${(speed / (1024 * 1024)).toFixed(1)} MB/s`;
+        } else if (speed >= 1024) {
+          speedText = `${(speed / 1024).toFixed(1)} KB/s`;
+        } else {
+          speedText = `${Math.round(speed)} B/s`;
+        }
+        progressSpeed.textContent = speedText;
+      }
+    };
+    
+    const uploadResult = await uploadFile(selectedFile, onProgress);
+    
+    // Hide progress bar
+    if (progressContainer) {
+      progressContainer.style.display = 'none';
+    }
+    
     if (uploadResult.success) {
       fileUrl = uploadResult.url;
       fileName = selectedFile.name;

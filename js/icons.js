@@ -31,6 +31,9 @@ const Icons = {
   // Music icon - Audio type
   music: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`,
 
+  // Video icon - Video type
+  video: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>`,
+
   // FileType icon - PDF type
   'file-type': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M9 13v-1h6v1"></path><path d="M12 12v5"></path><path d="M9 17h6"></path></svg>`,
 
@@ -121,6 +124,7 @@ function getFileTypeIcon(type) {
     'pdf': Icons['file-type'],
     'image': Icons['image'],
     'audio': Icons['music'],
+    'video': Icons['video'],
     'notice': Icons['alert-circle']
   };
   return typeIcons[type] || Icons['file-text'];

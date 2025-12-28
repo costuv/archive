@@ -286,14 +286,16 @@ async function deleteFolder(id) {
 // ============================================
 
 /**
- * Upload a file to Supabase Storage
+ * Upload a file to Supabase Storage with progress tracking
  * @param {File} file 
+ * @param {Function} onProgress - Callback for progress updates (percent, speed)
  * @returns {Promise<{success: boolean, url?: string, error?: string}>}
  */
-async function uploadFile(file) {
+async function uploadFile(file, onProgress) {
   const supabase = getSupabase();
   if (!supabase) {
     // Return object URL for local testing
+    if (onProgress) onProgress(100, 0);
     return { success: true, url: URL.createObjectURL(file) };
   }
 
@@ -303,20 +305,66 @@ async function uploadFile(file) {
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `uploads/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('archive-files')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      return { success: false, error: uploadError.message };
-    }
-
-    // Get public URL
-    const { data } = supabase.storage
-      .from('archive-files')
-      .getPublicUrl(filePath);
-
-    return { success: true, url: data.publicUrl };
+    // Get the Supabase URL and key for direct upload
+    const supabaseUrl = 'https://ogwtptuzvcugxctveutc.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nd3RwdHV6dmN1Z3hjdHZldXRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4OTQ5MTYsImV4cCI6MjA4MjQ3MDkxNn0.MB7I1O897siTS1xAJegYoQigRUwmf0dFoerZORnN8Fs';
+    
+    // Use XMLHttpRequest for progress tracking
+    return new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      const startTime = Date.now();
+      let lastLoaded = 0;
+      let lastTime = startTime;
+      
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable && onProgress) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          
+          // Calculate speed
+          const currentTime = Date.now();
+          const timeDiff = (currentTime - lastTime) / 1000; // seconds
+          const bytesDiff = e.loaded - lastLoaded;
+          const speed = timeDiff > 0 ? bytesDiff / timeDiff : 0; // bytes per second
+          
+          lastLoaded = e.loaded;
+          lastTime = currentTime;
+          
+          onProgress(percent, speed);
+        }
+      });
+      
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          // Get public URL
+          const { data } = supabase.storage
+            .from('archive-files')
+            .getPublicUrl(filePath);
+          
+          resolve({ success: true, url: data.publicUrl });
+        } else {
+          let errorMsg = 'Upload failed';
+          try {
+            const response = JSON.parse(xhr.responseText);
+            errorMsg = response.message || response.error || errorMsg;
+          } catch (e) {}
+          resolve({ success: false, error: errorMsg });
+        }
+      });
+      
+      xhr.addEventListener('error', () => {
+        resolve({ success: false, error: 'Network error during upload' });
+      });
+      
+      xhr.addEventListener('abort', () => {
+        resolve({ success: false, error: 'Upload cancelled' });
+      });
+      
+      // Open and send request
+      xhr.open('POST', `${supabaseUrl}/storage/v1/object/archive-files/${filePath}`);
+      xhr.setRequestHeader('Authorization', `Bearer ${supabaseKey}`);
+      xhr.setRequestHeader('x-upsert', 'true');
+      xhr.send(file);
+    });
   } catch (err) {
     return { success: false, error: err.message };
   }

@@ -336,6 +336,8 @@ function handleFileSelect(file) {
     typeSelect.value = 'image';
   } else if (['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac', 'wma'].includes(ext)) {
     typeSelect.value = 'audio';
+  } else if (['mp4', 'webm', 'mov', 'avi', 'mkv', 'wmv', 'flv'].includes(ext)) {
+    typeSelect.value = 'video';
   } else if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext)) {
     typeSelect.value = 'document';
   }

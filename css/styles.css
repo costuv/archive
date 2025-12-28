@@ -1097,6 +1097,50 @@ input, select, textarea {
   height: 1rem;
 }
 
+/* Upload Progress */
+.upload-progress {
+  padding: 0.75rem 1rem;
+  background-color: var(--color-gray-50);
+  border-top: 2px solid var(--color-gray-200);
+}
+
+.dark-mode .upload-progress {
+  background-color: #171717;
+  border-color: #262626;
+}
+
+.upload-progress-bar {
+  height: 8px;
+  background-color: var(--color-gray-200);
+  border: 1px solid var(--color-black);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.dark-mode .upload-progress-bar {
+  background-color: #262626;
+  border-color: #404040;
+}
+
+.upload-progress-fill {
+  height: 100%;
+  width: 0%;
+  background-color: #dc2626;
+  transition: width 0.2s ease;
+}
+
+.upload-progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-gray-600);
+}
+
+.dark-mode .upload-progress-info {
+  color: #a3a3a3;
+}
+
 /* Tags Input */
 .tag-input-wrapper {
   display: flex;
