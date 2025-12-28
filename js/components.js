@@ -7,6 +7,19 @@
 // FILE CARD
 // ============================================
 
+function getFileTypeIcon(type) {
+  const typeIcons = {
+    'document': getIcon('file-text'),
+    'pdf': getIcon('file-type'),
+    'image': getIcon('image'),
+    'audio': getIcon('music'),
+    'video': getIcon('video'),
+    'codes': getIcon('code'),
+    'notice': getIcon('alert-circle')
+  };
+  return typeIcons[type] || getIcon('file-text');
+}
+
 /**
  * Render a file card
  * @param {Object} file - File data
@@ -340,6 +353,8 @@ function handleFileSelect(file) {
     typeSelect.value = 'video';
   } else if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext)) {
     typeSelect.value = 'document';
+  } else if (['html', 'css', 'js', 'py', 'java', 'c', 'cpp', 'rb', 'php', 'ts', 'json', 'xml', 'ipynb'].includes(ext)) {
+    typeSelect.value = 'codes';
   }
 }
 

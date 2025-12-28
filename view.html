@@ -526,6 +526,8 @@
         case 'image': return icons.image;
         case 'audio': return icons.music;
         case 'video': return icons.video;
+        case 'codes': return icons.code;
+        case 'ipynb': return icons.notebook;
         case 'notice': return icons['alert-circle'];
         default: return icons.file;
       }
@@ -563,13 +565,53 @@
       // Documents
       if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext)) return 'document';
       
+      if (['html', 'css', 'js', 'py', 'java', 'c', 'cpp', 'rb', 'php', 'ts', 'json', 'xml'].includes(ext)) return 'codes';
+      if (ext === 'ipynb' || type === 'ipynb') return 'ipynb';
+
       return 'unknown';
     }
     
     // Render file viewer based on type
     function renderFileViewer(file) {
       const mediaType = detectMediaType(file.fileUrl, file.type);
-      
+
+      // Special handling for ipynb files: fetch and display as JSON (basic)
+      if (mediaType === 'ipynb') {
+        setTimeout(() => {
+          fetch(file.fileUrl)
+            .then(r => r.json())
+            .then(nb => {
+              const container = document.getElementById('ipynb-viewer-block');
+              if (!container) return;
+              let html = '';
+              (nb.cells || []).forEach(cell => {
+                if (cell.cell_type === 'markdown') {
+                  html += `<div class="ipynb-md-cell" style="margin-bottom:1.5em; color:#e5e7eb; background:none;">${cell.source.join('').replace(/\n/g,'<br>')}</div>`;
+                } else if (cell.cell_type === 'code') {
+                  html += `<div class="ipynb-code-cell" style="margin-bottom:1.5em;">
+                    <pre style="background:#23272e; color:#e5e7eb; padding:1em; border-radius:6px; overflow-x:auto; font-size:1em;">${cell.source.map(line => line.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('')}</pre>`;
+                  if (cell.outputs && cell.outputs.length) {
+                    cell.outputs.forEach(out => {
+                      if (out.output_type === 'stream' && out.text) {
+                        html += `<div class="ipynb-output" style="background:#18181b; color:#a3e635; padding:0.5em 1em; border-left:3px solid #a3e635; margin-bottom:0.5em;">${Array.isArray(out.text) ? out.text.join('') : out.text}</div>`;
+                      } else if (out.output_type === 'error') {
+                        html += `<div class="ipynb-error" style="background:#18181b; color:#f87171; padding:0.5em 1em; border-left:3px solid #f87171; margin-bottom:0.5em;">${out.evalue || ''}<br>${(out.traceback||[]).join('<br>')}</div>`;
+                      }
+                    });
+                  }
+                  html += `</div>`;
+                }
+              });
+              container.innerHTML = html || '<em style="color:#a3a3a3">Notebook is empty.</em>';
+            });
+        }, 0);
+        return `
+          <div class="file-viewer" style="background:#18181b; color:#e5e7eb; font-family:monospace; padding:2rem; overflow:auto;">
+            <div id="ipynb-viewer-block" style="width:100%;max-width:900px;margin:0 auto;">Loading notebook...</div>
+          </div>
+        `;
+      }
+
       if (!file.fileUrl) {
         return `
           <div class="file-viewer-placeholder">
@@ -578,7 +620,31 @@
           </div>
         `;
       }
-      
+
+      // Special handling for code files: fetch and display code content
+      if (mediaType === 'codes') {
+        // Guess language from extension
+        const ext = file.fileUrl.split('.').pop().toLowerCase().split('?')[0];
+        const languageMap = {
+          js: 'javascript', ts: 'typescript', py: 'python', java: 'java', c: 'c', cpp: 'cpp', rb: 'ruby', php: 'php', html: 'html', css: 'css', json: 'json', xml: 'xml', ipynb: 'ipynb'
+        };
+        const language = languageMap[ext] || '';
+        // Render a placeholder, then fetch and fill in code
+        setTimeout(() => {
+          fetch(file.fileUrl)
+            .then(r => r.text())
+            .then(code => {
+              const pre = document.getElementById('code-viewer-block');
+              if (pre) pre.textContent = code;
+            });
+        }, 0);
+        return `
+          <div class="file-viewer" style="background:#18181b; color:#e5e7eb; font-family:monospace; padding:2rem; overflow:auto;">
+            <pre id="code-viewer-block" style="white-space:pre-wrap; word-break:break-word; font-size:1rem; line-height:1.5;">Loading code...</pre>
+          </div>
+        `;
+      }
+
       switch (mediaType) {
         case 'pdf':
           // Use Google Docs viewer for PDF files for better compatibility
@@ -603,7 +669,20 @@
               Your browser does not support the audio tag.
             </audio>
           `;
-        
+        case 'code': {
+          // file.content should be the code string, or fetch it from file.fileUrl
+          const languageClass = file.language ? `language-${file.language}` : '';
+          const escaped = file.content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+          return `
+            <pre class="code-block">
+              <code class="${languageClass}">${escaped}</code>
+            </pre>
+          `;
+        }
+
         case 'document':
           return `
             <div class="file-viewer-placeholder">
