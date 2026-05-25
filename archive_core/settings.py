@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
+from decouple import Csv, config
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-4(*3+6oz1_ogbyd)e084m
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = ['archive-2fhs.onrender.com']
 
 
 # Application definition
