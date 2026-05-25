@@ -1,0 +1,326 @@
+{% extends 'base.html' %} {% block title %}Notice — ArchIve{% endblock %}
+<!--prettier ignore-->
+{%block content %}
+<div class="p-4 md:p-6 space-y-5">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <h1
+      class="text-2xl md:text-3xl font-bold whitespace-nowrap text-black dark:text-white"
+    >
+      Notice
+    </h1>
+    {% if request.user.is_staff or request.user.is_superuser %}
+    <a href="{% url 'create-notice' %}">
+      <button
+        class="border-2 border-black dark:border-white rounded-2xl py-1.5 px-5 text-base font-bold bg-gray-200 dark:bg-zinc-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] whitespace-nowrap w-fit"
+      >
+        + New Notice
+      </button>
+    </a>
+    {% endif %}
+  </div>
+
+  <div
+    class="bg-gray-200 dark:bg-zinc-900 border-2 border-black dark:border-white rounded-xl px-4 py-2.5 flex justify-between items-center text-black dark:text-white"
+  >
+    <span id="unread-badge" class="text-base font-bold">
+      {{ unread_count }} Unread Notice{% if unread_count != 1 %}s{% endif %}
+    </span>
+
+    <div class="relative">
+      <button
+        id="sort-toggle"
+        class="flex items-center gap-1.5 text-base font-bold px-3 py-1 border-2 border-black dark:border-white rounded-xl bg-white dark:bg-zinc-950 transition-colors hover:bg-gray-100 dark:hover:bg-zinc-800"
+      >
+        Sort by: Latest
+        <svg
+          id="sort-chevron"
+          class="w-4 h-4 transition-transform duration-200"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      <div
+        id="sort-dropdown"
+        class="sort-dropdown absolute right-0 mt-1 w-40 bg-white dark:bg-zinc-900 border-2 border-black dark:border-white rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] z-10 overflow-hidden"
+      >
+        <button
+          class="w-full text-left px-4 py-2.5 text-sm font-bold hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+        >
+          Latest
+        </button>
+        <button
+          class="w-full text-left px-4 py-2.5 text-sm font-bold hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors border-t border-gray-200 dark:border-zinc-800"
+        >
+          Oldest
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-4" id="notice-container">
+    {% for notice in notices %}
+    <div
+      class="notice-card border-2 border-black dark:border-white rounded-sm p-4 md:p-5 bg-white dark:bg-zinc-900 flex items-start justify-between gap-3 cursor-pointer transition-all"
+      data-id="{{ notice.id }}"
+      data-title="{{ notice.title }}"
+      data-description="{{ notice.description }}"
+      data-date="{{ notice.created_at|date:'F j, Y' }}"
+      data-timestamp="{{ notice.created_at|date:'U' }}"
+      data-read="{{ notice.is_read|yesno:'true,false' }}"
+    >
+      <div class="flex items-start gap-3 min-w-0">
+        {% if not notice.is_read %}
+        <span
+          class="unread-dot w-2.5 h-2.5 rounded-full bg-red-500 border border-black dark:border-white flex-shrink-0 mt-1.5"
+        ></span>
+        {% else %}
+        <span class="unread-dot w-2.5 h-2.5 flex-shrink-0 mt-1.5"></span>
+        {% endif %}
+
+        <div class="min-w-0">
+          <p
+            class="text-base font-bold leading-snug text-black dark:text-white"
+          >
+            {{ notice.title }}
+          </p>
+          {% if notice.description %}
+          <p
+            class="text-sm text-gray-500 dark:text-zinc-400 font-normal mt-1 line-clamp-2 leading-snug"
+          >
+            {{ notice.description }}
+          </p>
+          {% endif %}
+          <!--prettier ignore-->
+          {% if request.user.is_staff or request.user.is_superuser %}
+          <div
+            class="flex items-center gap-3 mt-2"
+            onclick="event.stopPropagation()"
+          >
+            <a
+              href="{% url 'edit-notice' notice.id %}"
+              class="text-xs font-bold text-black dark:text-zinc-300 hover:underline"
+              >Edit</a
+            >
+            <form
+              method="POST"
+              action="{% url 'delete-notice' notice.id %}"
+              class="inline"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="text-xs font-bold text-red-500 hover:underline"
+              >
+                Delete
+              </button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <span
+        class="text-xs text-gray-400 dark:text-zinc-500 font-bold whitespace-nowrap flex-shrink-0 mt-1"
+      >
+        {{ notice.created_at|date:"M j" }}
+      </span>
+    </div>
+    {% empty %}
+    <div
+      class="border-2 border-black dark:border-white border-dashed rounded-xl p-12 text-center"
+    >
+      <p class="text-gray-500 dark:text-zinc-400 font-bold text-lg">
+        No notices yet.
+      </p>
+      <p class="text-gray-400 dark:text-zinc-500 text-sm mt-1">
+        Check back later for updates.
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div
+  id="notice-modal-backdrop"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-zinc-900 border-4 border-black dark:border-white rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] w-full max-w-lg max-h-[80vh] flex flex-col"
+  >
+    <div
+      class="flex items-start justify-between gap-4 p-5 border-b-2 border-black dark:border-white"
+    >
+      <div class="min-w-0">
+        <p
+          id="modal-date"
+          class="text-xs text-gray-400 dark:text-zinc-500 font-bold mb-1"
+        ></p>
+        <h2
+          id="modal-title"
+          class="text-xl font-bold leading-snug text-black dark:text-white"
+        ></h2>
+      </div>
+      <button
+        id="modal-close"
+        class="flex-shrink-0 w-8 h-8 border-2 border-black dark:border-white text-black dark:text-white rounded-lg flex items-center justify-center bg-white dark:bg-zinc-950 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+        aria-label="Close"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <div class="p-5 overflow-y-auto">
+      <p
+        id="modal-description"
+        class="text-base leading-relaxed text-gray-700 dark:text-zinc-300"
+      ></p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .sort-dropdown {
+    display: none;
+  }
+  .sort-dropdown.open {
+    display: block;
+  }
+  #notice-modal-backdrop.open {
+    display: flex;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .notice-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  }
+  html.dark .notice-card:hover {
+    box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 1);
+  }
+</style>
+
+<script>
+  // ── Sort dropdown ──────────────────────────────
+  const sortToggle = document.getElementById("sort-toggle");
+  const sortDropdown = document.getElementById("sort-dropdown");
+  const sortChevron = document.getElementById("sort-chevron");
+
+  sortToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sortDropdown.classList.toggle("open");
+    sortChevron.style.transform = sortDropdown.classList.contains("open")
+      ? "rotate(180deg)"
+      : "";
+  });
+
+  document.addEventListener("click", () => {
+    sortDropdown.classList.remove("open");
+    sortChevron.style.transform = "";
+  });
+
+  sortDropdown.querySelectorAll("button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sortType = btn.textContent.trim();
+      sortToggle.childNodes.textContent = "Sort by: " + sortType + " ";
+      sortNotices(sortType);
+    });
+  });
+
+  function sortNotices(sortType) {
+    const container = document.getElementById("notice-container");
+    const cards = Array.from(document.querySelectorAll(".notice-card"));
+
+    cards.sort((a, b) => {
+      const timestampA = parseInt(a.dataset.timestamp);
+      const timestampB = parseInt(b.dataset.timestamp);
+
+      if (sortType === "Latest") {
+        return timestampB - timestampA;
+      } else if (sortType === "Oldest") {
+        return timestampA - timestampB;
+      }
+      return 0;
+    });
+
+    cards.forEach(card => container.appendChild(card));
+  }
+
+  // ── Notice modal ──────────────────────────────
+  const backdrop = document.getElementById("notice-modal-backdrop");
+  const modalTitle = document.getElementById("modal-title");
+  const modalDate = document.getElementById("modal-date");
+  const modalDescription = document.getElementById("modal-description");
+  const modalClose = document.getElementById("modal-close");
+  const unreadBadge = document.getElementById("unread-badge");
+  const sidebarBadge = document.getElementById("sidebar-unread-badge");
+  let unreadCount = {{ unread_count }};
+
+  document.querySelectorAll(".notice-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      modalTitle.textContent = card.dataset.title;
+      modalDate.textContent = card.dataset.date;
+      modalDescription.textContent = card.dataset.description;
+      backdrop.classList.add("open");
+      document.body.style.overflow = "hidden";
+
+      if (card.dataset.read === "false") {
+        fetch(`/notices/${card.dataset.id}/read/`, {
+          method: "POST",
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        }).then((res) => {
+          if (res.ok) {
+            const dot = card.querySelector(".unread-dot");
+            if (dot) dot.style.visibility = "hidden";
+
+            unreadCount = Math.max(0, unreadCount - 1);
+            unreadBadge.textContent = `${unreadCount} Unread Notice${unreadCount !== 1 ? "s" : ""}`;
+
+            if (sidebarBadge) {
+              if (unreadCount > 0) {
+                sidebarBadge.textContent = unreadCount;
+                sidebarBadge.classList.remove("hidden");
+              } else {
+                sidebarBadge.classList.add("hidden");
+              }
+            }
+
+            card.dataset.read = "true";
+          }
+        });
+      }
+    });
+  });
+
+  function closeModal() {
+    backdrop.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  modalClose.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+</script>
+{% endblock %}

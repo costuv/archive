@@ -1,0 +1,78 @@
+{% extends 'base_auth.html' %}
+{% block title %}Register — ArchIve{% endblock %}
+{% block content %}
+
+<h1
+  class="text-3xl sm:text-[36px] font-bold text-center mb-6 sm:mb-8 tracking-wide text-black dark:text-white"
+>
+  Register
+</h1>
+
+{% if errors %}
+<div
+  class="border-2 border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950/40 rounded-lg px-4 py-2 mb-5 text-red-600 dark:text-red-400 font-bold text-base sm:text-lg space-y-1"
+>
+  {% for error in errors %}
+  <div>{{ error }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<form method="POST" class="flex flex-col space-y-4 sm:space-y-5">
+  {% csrf_token %}
+
+  <div class="flex flex-col space-y-1">
+    <label for="username" class="text-xl sm:text-[22px] text-black dark:text-white">Username</label>
+    <input
+      type="text"
+      id="username"
+      name="username"
+      placeholder="@archive"
+      value="{{ form_data.username|default:'' }}"
+      autofocus
+      required
+      class="border-[2.5px] border-black dark:border-white rounded-[8px] py-2 px-4 text-lg sm:text-xl bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
+    />
+  </div>
+
+  <div class="flex flex-col space-y-1">
+    <label for="email" class="text-xl sm:text-[22px] text-black dark:text-white">Email Address</label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      placeholder="you@example.com"
+      value="{{ form_data.email|default:'' }}"
+      required
+      class="border-[2.5px] border-black dark:border-white rounded-[8px] py-2 px-4 text-lg sm:text-xl bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
+    />
+  </div>
+
+  <div class="flex flex-col space-y-1">
+    <label for="password" class="text-xl sm:text-[22px] text-black dark:text-white">Password</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="**************"
+      required
+      class="border-[2.5px] border-black dark:border-white rounded-[8px] py-2 px-4 text-lg sm:text-xl bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
+    />
+  </div>
+
+  <div class="pt-3 sm:pt-4">
+    <button
+      type="submit"
+      class="w-full bg-black dark:bg-white text-white dark:text-black border-[2.5px] border-black dark:border-white rounded-[10px] py-2.5 text-xl sm:text-[22px] hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer font-bold"
+    >
+      Sign Up
+    </button>
+  </div>
+
+  <div class="text-center text-base sm:text-[18px] pt-1 text-black dark:text-white">
+    <span>Already have an account? </span>
+    <a href="{% url 'login' %}" class="font-bold hover:underline text-black dark:text-white">Login</a>
+  </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}404 — ArchIve{% endblock %}
+{% block content %}
+<div
+  class="flex flex-col items-center justify-center py-32 text-center space-y-4 text-black dark:text-white"
+>
+  <h1 class="text-6xl font-bold tracking-tight">404</h1>
+  <p class="text-2xl font-bold">Page Not Found</p>
+  <p class="text-gray-500 dark:text-zinc-400">The page you're looking for doesn't exist.</p>
+  <a
+    href="/"
+    class="border-2 border-black dark:border-white rounded-xl py-2 px-6 font-bold bg-white dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+  >
+    Go Home
+  </a>
+</div>
+{% endblock %}

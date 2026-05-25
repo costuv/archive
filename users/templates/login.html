@@ -1,0 +1,54 @@
+<!-- prettier-ignore -->
+{% extends 'base_auth.html' %}
+<!-- prettier-ignore -->
+{% block title %}Login — ArchIve{% endblock %}
+<!-- prettier-ignore -->
+{% block content %}
+<h1 class="text-[36px] font-bold text-center mb-8 tracking-wide">Login</h1>
+{% if error %}
+<div
+  class="border-2 border-red-500 bg-red-50 rounded-lg px-4 py-2 mb-5 text-red-600 font-bold text-base space-y-1"
+>
+  {{ error }}
+</div>
+{% endif %}
+<form method="POST" class="flex flex-col space-y-5">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.GET.next }}" />
+  <div class="flex flex-col space-y-1">
+    <label for="username" class="text-[22px]">Username</label>
+    <input
+      type="text"
+      id="username"
+      name="username"
+      placeholder="you@example.com"
+      autofocus
+      required
+      class="border-[2.5px] border-black rounded-[8px] py-2 px-4 text-xl placeholder-gray-400 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+    />
+  </div>
+  <div class="flex flex-col space-y-1">
+    <label for="password" class="text-[22px]">Password</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="**************"
+      required
+      class="border-[2.5px] border-black rounded-[8px] py-2 px-4 text-xl placeholder-gray-400 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+    />
+  </div>
+  <div class="pt-4">
+    <button
+      type="submit"
+      class="w-full bg-black text-white border-[2.5px] border-black rounded-[10px] py-2.5 text-[22px] hover:bg-gray-800 transition-colors cursor-pointer"
+    >
+      Sign In
+    </button>
+  </div>
+  <div class="text-center text-[18px] pt-1">
+    <span>Don't have an account? </span>
+    <a href="{% url 'register' %}" class="font-bold hover:underline">Sign Up</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}{% if repo_type == 'assignment' %}New Assignment{% elif repo_type == 'lab' %}New Lab Work{% else %}New Repository{% endif %} — ArchIve{% endblock %}
+{% block content %}
+<div class="p-4 md:p-6 max-w-2xl mx-auto space-y-6">
+  <a
+    href="{% if repo_type == 'assignment' %}/assignments/{% elif repo_type == 'lab' %}/repositories/lab/{% else %}/repositories/{% endif %}"
+    class="inline-flex items-center gap-2 border-2 border-black dark:border-white rounded-lg py-1 px-4 text-base font-bold bg-gray-200 dark:bg-zinc-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] w-fit"
+  >
+    <svg
+      class="w-4 h-4 fill-none stroke-black dark:stroke-white stroke-2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      viewBox="0 0 24 24"
+    >
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+    Back
+  </a>
+
+  <h1 class="text-2xl md:text-3xl font-bold text-black dark:text-white">{% if repo_type == 'assignment' %}Create New Assignment{% elif repo_type == 'lab' %}Create New Lab Work{% else %}Create New Repository{% endif %}</h1>
+
+  <form method="POST" class="space-y-5">
+    {% csrf_token %}
+    <input type="hidden" name="repo_type" value="{{ repo_type }}" />
+
+    <div class="space-y-1.5">
+      <label class="text-base font-bold text-black dark:text-white">{% if repo_type == 'assignment' %}Assignment{% elif repo_type == 'lab' %}Lab Work{% else %}Repository{% endif %} Name <span class="text-red-500">*</span></label>
+      <input
+        type="text"
+        name="name"
+        placeholder="{% if repo_type == 'assignment' %}my-assignment{% elif repo_type == 'lab' %}my-lab-work{% else %}my-repository{% endif %}"
+        required
+        class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2.5 text-base bg-white dark:bg-zinc-900 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all"
+      />
+    </div>
+
+    <div class="space-y-1.5">
+      <label class="text-base font-bold text-black dark:text-white">
+        Description <span class="text-gray-400 dark:text-zinc-500 font-normal text-sm">(optional)</span>
+      </label>
+      <textarea
+        name="description"
+        placeholder="What is this about?"
+        rows="3"
+        class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2.5 text-base bg-white dark:bg-zinc-900 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all resize-none"
+      ></textarea>
+    </div>
+
+    <div class="space-y-1.5">
+      <label class="text-base font-bold text-black dark:text-white">Type</label>
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 cursor-pointer text-black dark:text-white">
+          <div class="relative">
+            <input type="checkbox" name="is_assignment" class="peer sr-only" {% if repo_type == 'assignment' %}checked{% endif %} />
+            <div class="w-5 h-5 border-2 border-black dark:border-white rounded bg-white dark:bg-zinc-900 peer-checked:bg-black dark:peer-checked:bg-white transition-colors"></div>
+            <svg
+              class="w-3 h-3 stroke-white dark:stroke-black stroke- fill-none absolute top-1 left-1 hidden peer-checked:block"
+              viewBox="0 0 24 24"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <span class="text-base font-bold">Assignment</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer text-black dark:text-white">
+          <div class="relative">
+            <input type="checkbox" name="is_lab" class="peer sr-only" {% if repo_type == 'lab' %}checked{% endif %} />
+            <div class="w-5 h-5 border-2 border-black dark:border-white rounded bg-white dark:bg-zinc-900 peer-checked:bg-black dark:peer-checked:bg-white transition-colors"></div>
+            <svg
+              class="w-3 h-3 stroke-white dark:stroke-black stroke- fill-none absolute top-1 left-1 hidden peer-checked:block"
+              viewBox="0 0 24 24"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <span class="text-base font-bold">LAB</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="space-y-1.5">
+      <label class="text-base font-bold text-black dark:text-white">
+        Deadline <span class="text-gray-400 dark:text-zinc-500 font-normal text-sm">(optional)</span>
+      </label>
+      <input
+        type="date"
+        name="deadline"
+        class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2.5 text-base bg-white dark:bg-zinc-900 text-black dark:text-white focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all"
+      />
+    </div>
+
+    <div class="border-t-2 border-black dark:border-white"></div>
+
+    <div class="flex gap-3">
+      <button
+        type="submit"
+        class="border-2 border-black dark:border-white rounded-xl py-2 px-6 text-base font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        {% if repo_type == 'assignment' %}Create Assignment{% elif repo_type == 'lab' %}Create Lab Work{% else %}Create Repository{% endif %}
+      </button>
+      <a
+        href="{% if repo_type == 'assignment' %}/assignments/{% elif repo_type == 'lab' %}/repositories/lab/{% else %}/repositories/{% endif %}"
+        class="border-2 border-black dark:border-white rounded-xl py-2 px-6 text-base font-bold bg-white dark:bg-zinc-900 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

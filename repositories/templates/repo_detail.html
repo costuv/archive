@@ -1,0 +1,725 @@
+{% extends 'base.html' %}
+{% block title %}{{ repo.name }} — ArchIve{% endblock %}
+{% block content %}
+<div class="flex flex-col min-h-screen text-black dark:text-white">
+  <div class="flex-1">
+    <div class="px-4 md:px-6 pt-5 pb-4 space-y-3">
+      <a
+        href="{{ back_url }}"
+        class="inline-flex items-center gap-2 border-2 border-black dark:border-white rounded-lg py-1 px-4 text-base font-bold bg-gray-200 dark:bg-zinc-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] w-fit"
+      >
+        <svg
+          class="w-4 h-4 fill-none stroke-black dark:stroke-white stroke-2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+        Back
+      </a>
+
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-3xl md:text-4xl font-bold tracking-wide">
+          <a
+            href="{% url 'repo-detail' username=repo.owner.username repo_name=repo.name %}"
+            class="hover:underline"
+            >{{ repo.name }}</a
+          >
+          {% if current_folder %}
+          <span class="text-gray-400 dark:text-zinc-500"> › </span>
+          <span>{{ current_folder.name }}</span>
+          {% endif %}
+        </h1>
+        {% if not current_folder %}
+        {% if request.user.is_staff or request.user.is_superuser %}
+        <button
+          id="delete-repo-btn"
+          class="action-btn border-2 border-black dark:border-white rounded-full py-1 px-4 text-sm font-bold bg-white dark:bg-zinc-900 text-red-500 dark:text-red-400 flex items-center gap-1.5 hover:bg-gray-50 dark:hover:bg-zinc-800"
+        >
+          <svg
+            class="w-3.5 h-3.5 fill-none stroke-red-500 dark:stroke-red-400 stroke-2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            <path d="M10 11v6M14 11v6" />
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+          </svg>
+          Delete Repo
+        </button>
+        {%endif%} {% endif %}
+      </div>
+    </div>
+
+    <div class="px-4 md:px-6 py-3 flex items-center gap-2 flex-wrap">
+      {% if request.user.is_staff or request.user.is_superuser %}
+      <button
+        id="add-file-btn"
+        class="action-btn border-2 border-black dark:border-white rounded-full py-1 px-4 text-sm font-bold bg-white dark:bg-zinc-900 flex items-center gap-1.5 hover:bg-gray-50 dark:hover:bg-zinc-800"
+      >
+        <svg
+          class="w-3.5 h-3.5 fill-none stroke-black dark:stroke-white stroke-2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add File
+      </button>
+
+      <button
+        id="add-folder-btn"
+        class="action-btn border-2 border-black dark:border-white rounded-full py-1 px-4 text-sm font-bold bg-white dark:bg-zinc-900 flex items-center gap-1.5 hover:bg-gray-50 dark:hover:bg-zinc-800"
+      >
+        <svg
+          class="w-3.5 h-3.5 fill-none stroke-black dark:stroke-white stroke-2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          <line x1="12" y1="11" x2="12" y2="17" />
+          <line x1="9" y1="14" x2="15" y2="14" />
+        </svg>
+        Add Folder
+      </button>
+
+      <button
+        id="upload-btn"
+        class="action-btn border-2 border-black dark:border-white rounded-full py-1 px-4 text-sm font-bold bg-white dark:bg-zinc-900 flex items-center gap-1.5 hover:bg-gray-50 dark:hover:bg-zinc-800"
+      >
+        <svg
+          class="w-3.5 h-3.5 fill-none stroke-black dark:stroke-white stroke-2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        Upload
+      </button>
+      {%endif%}
+    </div>
+
+    <div class="border-t-[3px] border-black dark:border-white bg-white dark:bg-zinc-900">
+      {% for folder in folders %}
+      <div
+        class="file-row flex items-center justify-between px-4 md:px-6 py-3.5 border-b-[2px] border-black dark:border-zinc-800 bg-white dark:bg-zinc-900"
+      >
+        <a
+          href="{% url 'folder-detail' username=repo.owner.username repo_name=repo.name folder_id=folder.id %}"
+          class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+        >
+          <svg
+            class="w-5 h-5 flex-shrink-0 fill-none stroke-black dark:stroke-white stroke-2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
+          <div class="flex flex-col min-w-0">
+            <span class="text-lg font-bold leading-tight truncate text-black dark:text-white"
+              >{{ folder.name }}</span
+            >
+            <span class="text-xs text-gray-400 dark:text-zinc-500 font-normal mt-0.5"
+              >{{ folder.created_at|date:"n/j/Y" }}</span
+            >
+          </div>
+        </a>
+        <div class="relative flex-shrink-0">
+          <button
+            class="dot-toggle p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
+          >
+            <svg class="w-5 h-5 fill-black dark:fill-white" viewBox="0 0 24 24">
+              <circle cx="12" cy="5" r="1.5" />
+              <circle cx="12" cy="12" r="1.5" />
+              <circle cx="12" cy="19" r="1.5" />
+            </svg>
+          </button>
+          <div
+            class="dot-menu hidden absolute right-0 mt-1 w-36 bg-white dark:bg-zinc-900 border-2 border-black dark:border-white rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] z-10 overflow-hidden"
+          >
+            {% if request.user.is_staff or request.user.is_superuser %}
+            <button
+              class="rename-folder-btn w-full text-left px-4 py-2.5 text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800"
+              data-id="{{ folder.id }}"
+              data-name="{{ folder.name }}"
+            >
+              Rename
+            </button>
+            <form
+              method="POST"
+              action="{% url 'delete-folder' folder_id=folder.id %}"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="w-full text-left px-4 py-2.5 text-sm font-bold border-t border-gray-200 dark:border-zinc-800 text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-zinc-800"
+              >
+                Delete
+              </button>
+            </form>
+            {%endif%}
+          </div>
+        </div>
+      </div>
+      {% endfor %} 
+      
+      {% for file, file_path in files_with_paths %}
+      <div
+        class="file-row flex items-center justify-between px-4 md:px-6 py-3.5 border-b-[2px] border-black dark:border-zinc-800 bg-white dark:bg-zinc-900"
+      >
+        <a
+          href="{% url 'file-view' username=repo.owner.username repo_name=repo.name file_path=file_path %}"
+          class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+        >
+          <svg
+            class="w-5 h-5 flex-shrink-0 fill-none stroke-black dark:stroke-white stroke-2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          <div class="flex flex-col min-w-0">
+            <span class="text-lg font-bold leading-tight truncate text-black dark:text-white"
+              >{{ file.name }}</span
+            >
+            <span class="text-xs text-gray-400 dark:text-zinc-500 font-normal mt-0.5"
+              >{{ file.created_at|date:"n/j/Y" }} &bull; {{ file.file.size }} bytes</span
+            >
+          </div>
+        </a>
+        <div class="relative flex-shrink-0">
+          <button
+            class="dot-toggle p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
+          >
+            <svg class="w-5 h-5 fill-black dark:fill-white" viewBox="0 0 24 24">
+              <circle cx="12" cy="5" r="1.5" />
+              <circle cx="12" cy="12" r="1.5" />
+              <circle cx="12" cy="19" r="1.5" />
+            </svg>
+          </button>
+          <div
+            class="dot-menu hidden absolute right-0 mt-1 w-36 bg-white dark:bg-zinc-900 border-2 border-black dark:border-white rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] z-10 overflow-hidden"
+          >
+            <a
+              href="{{ file.file.url }}"
+              download
+              class="block w-full text-left px-4 py-2.5 text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800"
+            >
+              Download
+            </a>
+            {% if request.user.is_staff or request.user.is_superuser %}
+            <button
+              class="rename-file-btn w-full text-left px-4 py-2.5 text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 border-t border-gray-200 dark:border-zinc-800"
+              data-id="{{ file.id }}"
+              data-name="{{ file.name }}"
+            >
+              Rename
+            </button>
+            <form
+              method="POST"
+              action="{% url 'delete-file' file_id=file.id %}"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="w-full text-left px-4 py-2.5 text-sm font-bold border-t border-gray-200 dark:border-zinc-800 text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-zinc-800"
+              >
+                Delete
+              </button>
+            </form>
+            {%endif%}
+          </div>
+        </div>
+      </div>
+      {% endfor %} 
+      
+      {% if not folders and not files_with_paths %}
+      <div
+        class="border-2 border-black dark:border-zinc-700 border-dashed rounded-xl py-20 px-12 text-center mx-4 md:mx-6 my-6 bg-transparent"
+      >
+        <p class="text-gray-500 dark:text-zinc-400 font-bold text-lg">This repository is empty.</p>
+        <p class="text-gray-400 dark:text-zinc-500 text-sm mt-1">
+          Add files or folders to get started.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div
+  id="modal-add-file"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-zinc-900 border-4 border-black dark:border-white rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] w-full max-w-md flex flex-col text-black dark:text-white"
+  >
+    <div class="flex items-center justify-between p-5 border-b-2 border-black dark:border-white">
+      <h2 class="text-xl font-bold">Add File</h2>
+      <button
+        class="modal-close w-8 h-8 border-2 border-black dark:border-white rounded-lg flex items-center justify-center bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <form
+      method="POST"
+      action="{% url 'upload-file' username=repo.owner.username repo_name=repo.name %}"
+      enctype="multipart/form-data"
+      class="p-5 space-y-4"
+    >
+      {% csrf_token %} {% if current_folder %}
+      <input type="hidden" name="folder_id" value="{{ current_folder.id }}" />
+      {% endif %}
+      <div>
+        <label class="block text-sm font-bold mb-1.5">Select File(s)</label>
+        <input
+          type="file"
+          name="files"
+          multiple
+          required
+          class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2 text-sm font-bold bg-white dark:bg-zinc-800 text-black dark:text-white focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all cursor-pointer"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full border-2 border-black dark:border-white rounded-xl py-2 font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Add File
+      </button>
+    </form>
+  </div>
+</div>
+
+<div
+  id="modal-add-folder"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-zinc-900 border-4 border-black dark:border-white rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] w-full max-w-md flex flex-col text-black dark:text-white"
+  >
+    <div class="flex items-center justify-between p-5 border-b-2 border-black dark:border-white">
+      <h2 class="text-xl font-bold">Add Folder</h2>
+      <button
+        class="modal-close w-8 h-8 border-2 border-black dark:border-white rounded-lg flex items-center justify-center bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <form
+      method="POST"
+      action="{% url 'add-folder' username=repo.owner.username repo_name=repo.name %}"
+      class="p-5 space-y-4"
+    >
+      {% csrf_token %} {% if current_folder %}
+      <input type="hidden" name="parent_id" value="{{ current_folder.id }}" />
+      {% endif %}
+      <div>
+        <label class="block text-sm font-bold mb-1.5">Folder Name</label>
+        <input
+          type="text"
+          name="name"
+          required
+          placeholder="e.g. Week 1"
+          class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2 text-base font-bold bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full border-2 border-black dark:border-white rounded-xl py-2 font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Create Folder
+      </button>
+    </form>
+  </div>
+</div>
+
+<div
+  id="modal-upload"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-zinc-900 border-4 border-black dark:border-white rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] w-full max-w-md flex flex-col text-black dark:text-white"
+  >
+    <div class="flex items-center justify-between p-5 border-b-2 border-black dark:border-white">
+      <h2 class="text-xl font-bold">Upload Files</h2>
+      <button
+        class="modal-close w-8 h-8 border-2 border-black dark:border-white rounded-lg flex items-center justify-center bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <form
+      method="POST"
+      action="{% url 'upload-file' username=repo.owner.username repo_name=repo.name %}"
+      enctype="multipart/form-data"
+      class="p-5 space-y-4"
+    >
+      {% csrf_token %} {% if current_folder %}
+      <input type="hidden" name="folder_id" value="{{ current_folder.id }}" />
+      {% endif %}
+      <div
+        id="drop-zone"
+        class="border-2 border-dashed border-black dark:border-zinc-700 rounded-xl p-10 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all"
+      >
+        <svg
+          class="w-10 h-10 mx-auto mb-3 fill-none stroke-black dark:stroke-white stroke-2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <p class="font-bold text-base text-black dark:text-white">Drop files here or click to browse</p>
+        <p id="file-count" class="text-sm text-gray-400 dark:text-zinc-500 font-bold mt-1">
+          No files selected
+        </p>
+        <input
+          type="file"
+          name="files"
+          id="upload-input"
+          multiple
+          required
+          class="hidden"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full border-2 border-black dark:border-white rounded-xl py-2 font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Upload
+      </button>
+    </form>
+  </div>
+</div>
+
+<div
+  id="modal-delete-repo"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-zinc-900 border-4 border-black dark:border-white rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] w-full max-w-md flex flex-col text-black dark:text-white"
+  >
+    <div class="flex items-center justify-between p-5 border-b-2 border-black dark:border-white">
+      <h2 class="text-xl font-bold">Delete Repository</h2>
+      <button
+        class="modal-close w-8 h-8 border-2 border-black dark:border-white rounded-lg flex items-center justify-center bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <p class="text-base font-bold">
+        Are you sure you want to delete
+        <span class="text-red-500 dark:text-red-400">{{ repo.name }}</span>?
+      </p>
+      <p class="text-sm text-gray-500 dark:text-zinc-400">
+        This will permanently delete the repository and all its files and folders.
+      </p>
+      <form
+        method="POST"
+        action="{% url 'delete-repo' username=repo.owner.username repo_name=repo.name %}"
+      >
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="w-full border-2 border-black dark:border-white rounded-xl py-2 font-bold bg-red-500 text-white hover:bg-red-600 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+        >
+          Yes, Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div
+  id="modal-rename-file"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-zinc-900 border-4 border-black dark:border-white rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] w-full max-w-md flex flex-col text-black dark:text-white"
+  >
+    <div class="flex items-center justify-between p-5 border-b-2 border-black dark:border-white">
+      <h2 class="text-xl font-bold">Rename File</h2>
+      <button
+        class="modal-close w-8 h-8 border-2 border-black dark:border-white rounded-lg flex items-center justify-center bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <form id="rename-file-form" method="POST" action="" class="p-5 space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-bold mb-1.5">New Name</label>
+        <input
+          id="rename-file-input"
+          type="text"
+          name="name"
+          required
+          class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2 text-base font-bold bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full border-2 border-black dark:border-white rounded-xl py-2 font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Rename
+      </button>
+    </form>
+  </div>
+</div>
+
+<div
+  id="modal-rename-folder"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-zinc-900 border-4 border-black dark:border-white rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] w-full max-w-md flex flex-col text-black dark:text-white"
+  >
+    <div class="flex items-center justify-between p-5 border-b-2 border-black dark:border-white">
+      <h2 class="text-xl font-bold">Rename Folder</h2>
+      <button
+        class="modal-close w-8 h-8 border-2 border-black dark:border-white rounded-lg flex items-center justify-center bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <form id="rename-folder-form" method="POST" action="" class="p-5 space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-bold mb-1.5">New Name</label>
+        <input
+          id="rename-folder-input"
+          type="text"
+          name="name"
+          required
+          class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2 text-base font-bold bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full border-2 border-black dark:border-white rounded-xl py-2 font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Rename
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  #modal-add-file.open,
+  #modal-add-folder.open,
+  #modal-upload.open,
+  #modal-delete-repo.open,
+  #modal-rename-file.open,
+  #modal-rename-folder.open {
+    display: flex;
+  }
+  #drop-zone.drag-over {
+    background: #f3f4f6;
+    border-color: black;
+  }
+  .dark #drop-zone.drag-over {
+    background: #27272a;
+    border-color: white;
+  }
+</style>
+
+<script>
+  // ── Modal helpers ──────────────────────────────
+  function openModal(id) {
+    document.getElementById(id).classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeAllModals() {
+    document
+      .querySelectorAll("[id^='modal-']")
+      .forEach((m) => m.classList.remove("open"));
+    document.body.style.overflow = "";
+  }
+
+  document
+    .getElementById("add-file-btn")
+    .addEventListener("click", () => openModal("modal-add-file"));
+  document
+    .getElementById("add-folder-btn")
+    .addEventListener("click", () => openModal("modal-add-folder"));
+  document
+    .getElementById("upload-btn")
+    .addEventListener("click", () => openModal("modal-upload"));
+
+  const deleteRepoBtn = document.getElementById("delete-repo-btn");
+  if (deleteRepoBtn)
+    deleteRepoBtn.addEventListener("click", () => openModal("modal-delete-repo"));
+
+  // Close buttons (×)
+  document.querySelectorAll(".modal-close").forEach((btn) => {
+    btn.addEventListener("click", closeAllModals);
+  });
+
+  // Click backdrop to close
+  document.querySelectorAll("[id^='modal-']").forEach((modal) => {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeAllModals();
+    });
+  });
+
+  // Escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeAllModals();
+  });
+
+  // ── Upload drag-and-drop ──────────────────────
+  const dropZone = document.getElementById("drop-zone");
+  const uploadInput = document.getElementById("upload-input");
+  const fileCount = document.getElementById("file-count");
+
+  if (dropZone) {
+    dropZone.addEventListener("click", () => uploadInput.click());
+
+    uploadInput.addEventListener("change", () => {
+      const n = uploadInput.files.length;
+      fileCount.textContent =
+        n > 0 ? `${n} file${n !== 1 ? "s" : ""} selected` : "No files selected";
+    });
+
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("drag-over");
+    });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("drag-over");
+      uploadInput.files = e.dataTransfer.files;
+      const n = uploadInput.files.length;
+      fileCount.textContent = `${n} file${n !== 1 ? "s" : ""} selected`;
+    });
+  }
+
+  // ── Rename file ────────────────────────────────
+  document.querySelectorAll(".rename-file-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.getElementById("rename-file-form").action = `/repositories/file/${btn.dataset.id}/rename/`;
+      document.getElementById("rename-file-input").value = btn.dataset.name;
+      closeAllDropdowns();
+      openModal("modal-rename-file");
+    });
+  });
+
+  // ── Rename folder ──────────────────────────────
+  document.querySelectorAll(".rename-folder-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.getElementById("rename-folder-form").action = `/repositories/folder/${btn.dataset.id}/rename/`;
+      document.getElementById("rename-folder-input").value = btn.dataset.name;
+      closeAllDropdowns();
+      openModal("modal-rename-folder");
+    });
+  });
+
+  // ── Context Menu (3-dots Dropdowns) Toggle Logic ──
+  function closeAllDropdowns() {
+    document.querySelectorAll(".dot-menu").forEach((menu) => menu.classList.add("hidden"));
+  }
+
+  document.querySelectorAll(".dot-toggle").forEach((toggle) => {
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const parentContainer = toggle.nextElementSibling;
+      const isAlreadyOpen = !parentContainer.classList.contains("hidden");
+      closeAllDropdowns();
+      if (!isAlreadyOpen) {
+        parentContainer.classList.remove("hidden");
+      }
+    });
+  });
+
+  // Click anywhere off the menus to collapse them safely
+  document.addEventListener("click", () => closeAllDropdowns());
+</script>
+{% endblock %}

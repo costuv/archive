@@ -1,0 +1,73 @@
+{% extends 'base.html' %} {% block title %}Edit Notice — ArchIve{% endblock %}
+<!--prettier ignore-->
+{% block content %}
+<div class="p-4 md:p-6 max-w-2xl mx-auto space-y-6">
+  <a
+    href="{% url 'notices' %}"
+    class="inline-flex items-center gap-2 border-2 border-black dark:border-white rounded-lg py-1 px-4 text-base font-bold bg-gray-200 dark:bg-zinc-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] w-fit"
+  >
+    <svg
+      class="w-4 h-4 fill-none stroke-black dark:stroke-white stroke-2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      viewBox="0 0 24 24"
+    >
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+    Back
+  </a>
+
+  <h1 class="text-2xl md:text-3xl font-bold text-black dark:text-white">
+    Edit Notice
+  </h1>
+
+  <form method="POST" class="space-y-5">
+    {% csrf_token %}
+
+    <div class="space-y-1.5">
+      <label class="text-base font-bold text-black dark:text-white"
+        >Title</label
+      >
+      <input
+        type="text"
+        name="title"
+        value="{{ notice.title }}"
+        required
+        class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2.5 text-base bg-white dark:bg-zinc-900 text-black dark:text-white focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all"
+      />
+    </div>
+
+    <div class="space-y-1.5">
+      <label class="text-base font-bold text-black dark:text-white"
+        >Description</label
+      >
+      <textarea
+        name="description"
+        rows="4"
+        required
+        class="w-full border-2 border-black dark:border-white rounded-xl px-4 py-2.5 text-base bg-white dark:bg-zinc-900 text-black dark:text-white focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all resize-none"
+      >
+{{ notice.description }}</textarea
+      >
+    </div>
+
+    <div class="border-t-2 border-black dark:border-white"></div>
+
+    <div class="flex gap-3">
+      <button
+        type="submit"
+        class="border-2 border-black dark:border-white rounded-xl py-2 px-6 text-base font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Save Changes
+      </button>
+      <a
+        href="{% url 'notices' %}"
+        class="border-2 border-black dark:border-white rounded-xl py-2 px-6 text-base font-bold bg-white dark:bg-zinc-900 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

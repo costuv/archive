@@ -1,0 +1,102 @@
+{% extends 'base.html' %} {% block title %}New Notice — ArchIve{% endblock %}
+<!--prettier ignore-->
+{%block content %}
+<div class="p-4 md:p-8 max-w-4xl space-y-8">
+  <a
+    href="/notices/"
+    class="inline-flex items-center gap-2 border-2 border-black dark:border-white rounded-lg py-1 px-4 text-base font-bold bg-gray-200 dark:bg-zinc-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-700 transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] w-fit"
+  >
+    <svg
+      class="w-4 h-4 fill-none stroke-black dark:stroke-white stroke-2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      viewBox="0 0 24 24"
+    >
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+    Back
+  </a>
+
+  <h1
+    class="text-3xl md:text-4xl font-bold tracking-wide text-black dark:text-white"
+  >
+    New Notice
+  </h1>
+
+  <form method="POST" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
+      <div class="space-y-1.5 sm:w-48 flex-shrink-0">
+        <label class="text-base font-bold text-black dark:text-white">
+          Owner <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <select
+            name="owner"
+            class="w-full appearance-none border-2 border-black dark:border-white rounded-xl py-2.5 pl-4 pr-9 text-base bg-white dark:bg-zinc-900 text-black dark:text-white focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all cursor-pointer"
+          >
+            <option>{{ request.user.username }}</option>
+          </select>
+          <div
+            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3"
+          >
+            <svg
+              class="w-4 h-4 fill-none stroke-black dark:stroke-white stroke-2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              viewBox="0 0 24 24"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-1.5 flex-1">
+        <label class="text-base font-bold text-black dark:text-white">
+          Notice Title <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="title"
+          placeholder="Enter a title for the notice"
+          required
+          class="w-full border-2 border-black dark:border-white rounded-xl py-2.5 px-4 text-base bg-white dark:bg-zinc-900 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all"
+        />
+      </div>
+    </div>
+
+    <div class="space-y-1.5">
+      <label class="text-base font-bold text-black dark:text-white">
+        Description <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        name="content"
+        placeholder="Enter the full content of the notice..."
+        rows="5"
+        required
+        class="w-full border-2 border-black dark:border-white rounded-xl py-2.5 px-4 text-base bg-white dark:bg-zinc-900 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] transition-all resize-none"
+      ></textarea>
+    </div>
+
+    <div class="border-t-2 border-black dark:border-white"></div>
+
+    <div class="flex gap-3">
+      <button
+        type="submit"
+        class="border-2 border-black dark:border-white rounded-xl py-2 px-6 text-base font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Publish
+      </button>
+      <a
+        href="/notices/"
+        class="border-2 border-black dark:border-white rounded-xl py-2 px-6 text-base font-bold bg-white dark:bg-zinc-900 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
+      >
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
