@@ -22,11 +22,9 @@ SECRET_KEY = config(
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
-    'archive-2fhs.onrender.com',
+    'archive-1-7xch.onrender.com',
     'kaustuv.me',
     'www.kaustuv.me',
-    'localhost',
-    '127.0.0.1',
 ]
 
 
