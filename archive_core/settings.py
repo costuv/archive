@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-4(*3+6oz1_ogbyd)e084m
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 
-ALLOWED_HOSTS = ['archive-2fhs.onrender.com']
+ALLOWED_HOSTS = ['archive-2fhs.onrender.com','kaustuv.me','www.kaustuv.me']
 
 
 # Application definition
