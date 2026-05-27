@@ -25,9 +25,21 @@ ALLOWED_HOSTS = [
     'archive-1-7xch.onrender.com',
     'kaustuv.me',
     'www.kaustuv.me',
-    # '127.0.0.1'
+    '127.0.0.1'
 ]
 
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'ERROR',
+    },
+}
 
 # Application definition
 
