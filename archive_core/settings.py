@@ -25,6 +25,7 @@ ALLOWED_HOSTS = [
     'archive-1-7xch.onrender.com',
     'kaustuv.me',
     'www.kaustuv.me',
+    # '127.0.0.1'
 ]
 
 
